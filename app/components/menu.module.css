@@ -1,0 +1,59 @@
+.sidebar {
+  background: var(--inverse-bg-1);
+  color: var(--inverse-text);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  transition: background 0.2s ease;
+}
+
+.brand { display: flex; align-items: center; gap: 10px; }
+.brandMark { width: 30px; height: 30px; flex-shrink: 0; }
+.brandText { display: flex; flex-direction: column; line-height: 1.1; }
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.brandSub {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--inverse-text-dim);
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.nav { display: flex; flex-direction: column; gap: 2px; }
+
+.navItem {
+  display: flex; align-items: center; gap: 11px;
+  padding: 10px 12px; border-radius: 8px;
+  font-size: 13.5px; color: var(--inverse-text-dim);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navItem:hover {
+  background: rgba(255,255,255,0.06);
+  color: var(--inverse-text);
+}
+
+.navItemActive { background: var(--accent-violet); color: #ffffff; }
+
+.navFooter {
+  margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 18px; font-size: 11.5px;
+  color: var(--inverse-text-dim); line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .sidebar { display: none; }
+}

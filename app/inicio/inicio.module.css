@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.page {
+  --ink-900: #1e1b2e; --ink-700: #4b4760; --ink-500: #726c87; --ink-300: #a29cb3;
+  --surface-0: #f8fafc; --surface-1: #ffffff; --surface-2: #ffffff; --line: #e2e8f0;
+  --accent-violet: #6d28d9; --accent-violet-dark: #4c1d95; --accent-violet-medium: #9664e4;
+  --accent-violet-soft: #ede9fe; --accent-violet-tint: #f5f3ff;
+  --state-good: #16a34a; --state-good-soft: #dcfce7;
+  --state-watch: #eab308; --state-watch-soft: #fef9c3;
+  --state-critical: #dc2626; --state-critical-soft: #fee2e2;
+  --font-display: 'Inter', system-ui, sans-serif; --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Inter', system-ui, sans-serif;
+
+  background: var(--surface-0); color: var(--ink-900);
+  font-family: var(--font-body); min-height: 100vh;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.page[data-theme="escuro"] {
+  --ink-900: #f3f1fa; --ink-700: #c7c2d9; --ink-500: #948fa8; --ink-300: #5d5876;
+  --surface-0: #14121f; --surface-1: #1c1930; --surface-2: #221d3a; --line: #322c4c;
+  --accent-violet: #a78bfa; --accent-violet-dark: #c4b5fd; --accent-violet-medium: #8b5cf6;
+  --accent-violet-soft: rgba(167, 139, 250, 0.16); --accent-violet-tint: rgba(167, 139, 250, 0.08);
+  --state-good: #4ade80; --state-good-soft: rgba(74, 222, 128, 0.14);
+  --state-watch: #fcd34d; --state-watch-soft: rgba(252, 211, 77, 0.14);
+  --state-critical: #f87171; --state-critical-soft: rgba(248, 113, 113, 0.14);
+}
+
+.shell { max-width: 1320px; margin: 0 auto; padding: 32px 56px 80px; }
+
+/* ---------------------------------- Header actions (canto superior direito) --- */
+.createButton {
+  font-size: 12.5px; font-weight: 600; color: #ffffff; background: var(--accent-violet); border: none; border-radius: 999px;
+  padding: 9px 16px; cursor: pointer; text-decoration: none; white-space: nowrap;
+  display: inline-flex; align-items: center; transition: background 0.15s ease;
+}
+.createButton:hover { background: var(--accent-violet-dark); }
+
+.codeButton {
+  font-size: 12.5px; font-weight: 600; color: var(--accent-violet); background: #ffffff;
+  border: 1.5px solid var(--accent-violet); border-radius: 999px; padding: 8px 15px; cursor: pointer; white-space: nowrap;
+  transition: background 0.15s ease;
+}
+.codeButton:hover { background: var(--accent-violet-soft); }
+
+/* ---------------------------------- Panel ------------------------------------- */
+.panel { background: var(--surface-1); border: 1px solid var(--line); border-radius: 16px; padding: 24px 26px; }
+.panelHeader { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; }
+.panelTitle { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ink-900); }
+.panelHint { font-size: 12.5px; color: var(--ink-500); margin-top: 4px; }
+
+/* ---------------------------------- Empresas (grid de cards grandes) ---------- */
+.companyGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+
+.companyCard {
+  background: var(--surface-2); border: 1px solid var(--line); border-radius: 16px;
+  padding: 22px; display: flex; flex-direction: column; gap: 18px;
+  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.companyCard:hover { box-shadow: 0 10px 28px rgba(30, 27, 46, 0.08); transform: translateY(-2px); border-color: var(--ink-300); }
+
+.companyCardTop { display: flex; align-items: flex-start; justify-content: space-between; }
+
+.companyAvatar {
+  width: 52px; height: 52px; border-radius: 16px; background: var(--accent-violet-tint); border: 1px solid var(--line);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; color: var(--accent-violet-dark);
+  font-family: var(--font-display); flex-shrink: 0;
+}
+
+.companyName { font-family: var(--font-display); font-size: 17px; font-weight: 600; color: var(--ink-900); margin-bottom: 5px; }
+.companyMeta { font-size: 12.5px; color: var(--ink-500); }
+
+.rolePillAdmin, .rolePillMember {
+  font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 100px; white-space: nowrap;
+}
+.rolePillAdmin { background: var(--accent-violet-soft); color: var(--accent-violet); }
+.rolePillMember { background: var(--surface-1); border: 1px solid var(--line); color: var(--ink-700); }
+
+.companyFooter { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+
+.enterButton {
+  font-size: 13px; font-weight: 600; color: #ffffff; background: var(--accent-violet); border: none; border-radius: 999px;
+  padding: 10px 20px; cursor: pointer; text-decoration: none; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 8px; transition: background 0.15s ease;
+}
+.enterButton:hover { background: var(--accent-violet-dark); }
+
+/* ---------------------------------- Empty state -------------------------------- */
+.empty { padding: 34px 4px; text-align: left; }
+.emptyTitle { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--ink-900); margin-bottom: 6px; }
+.emptyBody { font-size: 12.5px; color: var(--ink-500); }
+
+/* ---------------------------------- Forms (usados no modal) -------------------- */
+.form { display: flex; flex-direction: column; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.fieldLabel { font-size: 12px; font-weight: 500; color: var(--ink-500); }
+
+.input {
+  font-family: var(--font-body); font-size: 13.5px; color: var(--ink-900); background: var(--surface-1);
+  border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; outline: none;
+  transition: border-color 0.15s ease;
+}
+.input:focus { border-color: var(--accent-violet); }
+.inputError { border-color: var(--state-critical); }
+.codeInput { font-family: var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; }
+
+.secondaryButton {
+  font-size: 13px; font-weight: 600; color: #ffffff; background: var(--accent-violet);
+  border: none; border-radius: 999px; padding: 11px 20px; cursor: pointer; transition: background 0.15s ease;
+}
+.secondaryButton:hover:not(:disabled) { background: var(--accent-violet-dark); }
+.secondaryButton:disabled { background: var(--accent-violet-medium); cursor: default; }
+
+.cancelButton {
+  font-size: 13px; font-weight: 600; color: var(--accent-violet); background: #ffffff; border: 1.5px solid var(--accent-violet);
+  border-radius: 999px; padding: 11px 20px; cursor: pointer; transition: background 0.15s ease;
+}
+.cancelButton:hover { background: var(--accent-violet-soft); }
+
+.errorNote { font-size: 12px; color: var(--state-critical); background: var(--state-critical-soft); border-radius: 8px; padding: 9px 12px; }
+
+/* ---------------------------------- Modal --------------------------------------- */
+.modalOverlay {
+  position: fixed; inset: 0; background: rgba(30, 27, 46, 0.5); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; padding: 20px; z-index: 50;
+}
+
+.modalCard {
+  width: 100%; max-width: 400px; background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: 16px; padding: 24px; box-shadow: 0 24px 60px rgba(30, 27, 46, 0.18);
+}
+
+.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; gap: 12px; }
+
+.modalClose {
+  width: 28px; height: 28px; border-radius: 8px; border: none; background: var(--surface-0);
+  color: var(--ink-500); cursor: pointer; flex-shrink: 0; font-size: 12px;
+}
+.modalClose:hover { color: var(--ink-900); }
+
+.modalActions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 4px; }
+
+/* ---------------------------------- Responsive ---------------------------------- */
+@media (max-width: 1080px) {
+  .shell { padding: 28px 32px 60px; }
+}
+
+@media (max-width: 720px) {
+  .shell { padding: 24px 18px 40px; }
+  .companyGrid { grid-template-columns: 1fr; }
+  .createButton, .codeButton { padding: 8px 10px; }
+}

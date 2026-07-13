@@ -1,0 +1,304 @@
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.sectionSubtitle {
+  font-size: 13px;
+  color: var(--ink-500);
+  margin-top: 4px;
+}
+
+/* ------------------ Botões Básicos ------------------ */
+.primaryButton {
+  background: var(--ink-900);
+  color: var(--surface-2);
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.primaryButton:hover {
+  opacity: 0.9;
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--ink-700);
+  border: 1px solid var(--line);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.secondaryButton:hover {
+  background: var(--surface-1);
+}
+
+/* ------------------ Tabela de Dados ------------------ */
+.tableCard {
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 8px 16px;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-500);
+  font-weight: 600;
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.table td {
+  padding: 14px 12px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-700);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.nameCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarMini {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-900);
+  flex-shrink: 0;
+}
+
+.empName {
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.empRole {
+  font-size: 11.5px;
+  color: var(--ink-500);
+  margin-top: 2px;
+}
+
+.txtSetor {
+  color: var(--ink-900);
+  font-weight: 500;
+}
+
+/* ------------------ Badges de Estado ------------------ */
+.badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 100px;
+  display: inline-block;
+}
+
+.badgeGood { background: var(--state-good-soft); color: var(--state-good); }
+.badgeWatch { background: var(--state-watch-soft); color: var(--state-watch); }
+.badgeCritical { background: var(--state-critical-soft); color: var(--state-critical); }
+
+/* Grupos de Ação */
+.actionsGroup {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.actionBtn {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--ink-700);
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+}
+
+.actionBtn:hover {
+  background: var(--surface-1);
+  color: var(--ink-900);
+}
+
+.actionBtn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.btnDanger:hover {
+  background: var(--state-critical-soft);
+  border-color: var(--state-critical);
+  color: var(--state-critical);
+}
+
+/* ------------------ Estrutura do Modal overlay ------------------ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.24);
+  overflow: hidden;
+  animation: modalEnter 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modalHeader h3 {
+  font-family: var(--font-display);
+  font-size: 16.5px;
+  font-weight: 600;
+  color: var(--ink-900);
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  color: var(--ink-500);
+  cursor: pointer;
+}
+
+/* Formulário de cadastro */
+.form {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ink-700);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.formGroup input,
+.formGroup select {
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  color: var(--ink-900);
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-family: var(--font-body);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  border-color: var(--accent-violet);
+}
+
+.formGroup input:disabled,
+.formGroup select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background: var(--surface-0);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Responsividade Básica */
+@media (max-width: 640px) {
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+}

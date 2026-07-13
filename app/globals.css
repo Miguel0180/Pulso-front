@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+/* app/globals.css */
+
+/* app/globals.css */
+
+/* ☀️ VALORES PARA O MODO CLARO */
+:root {
+  --surface-0: #f8fafc;       /* Fundo total da página */
+  --surface-1: #ffffff;       /* Fundo dos cards principais */
+  --surface-2: #f1f5f9;       /* Fundo de tabelas/modais/inputs */
+  --line: #e2e8f0;            /* Bordas e divisores */
+  
+  --ink-900: #0f172a;         /* Títulos e textos principais */
+  --ink-700: #334155;         /* Textos secundários / corpo */
+  --ink-500: #64748b;         /* Subtítulos e labels menos importantes */
+  
+  /* Cores de estado (mantêm ou suavizam no dark) */
+  --state-good: #10b981;
+  --state-good-soft: #ecfdf5;
+  --state-watch: #f59e0b;
+  --state-watch-soft: #fffbeb;
+  --state-critical: #ef4444;
+  --state-critical-soft: #fef2f2;
+  --accent-violet: #7c3aed;
+}
+
+/* 🌙 VALORES PARA O MODO ESCURO (A mágica acontece aqui) */
+[data-theme="escuro"] {
+  --surface-0: #090d16;       /* Fundo total da página bem escuro */
+  --surface-1: #111827;       /* Cards e Tabelas ficam num tom grafite */
+  --surface-2: #1f2937;       /* Modais, inputs e linhas internas um pouco mais claros */
+  --line: #374151;            /* Bordas escuras e discretas */
+  
+  --ink-900: #f9fafb;         /* Títulos e textos principais viram BRANCO */
+  --ink-700: #e5e7eb;         /* Textos de leitura viram cinza claro */
+  --ink-500: #9ca3af;         /* Subtítulos e labels */
+
+  /* Suavizando os fundos dos Badges no modo escuro para não queimar os olhos */
+  --state-good-soft: rgba(16, 185, 129, 0.15);
+  --state-watch-soft: rgba(245, 158, 11, 0.15);
+  --state-critical-soft: rgba(239, 68, 68, 0.15);
+}
+
+/* Aplicação global do fundo da página */
+body {
+  background-color: var(--surface-0);
+  color: var(--ink-700);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
