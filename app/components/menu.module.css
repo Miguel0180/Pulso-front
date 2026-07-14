@@ -1,43 +1,83 @@
 .sidebar {
   background: var(--inverse-bg-1);
   color: var(--inverse-text);
-  padding: 28px 20px;
+  padding: 20px 14px;
   display: flex;
   flex-direction: column;
-  gap: 36px;
+  gap: 20px;
   position: sticky;
   top: 0;
   height: 100vh;
-  transition: background 0.2s ease;
+  width: 248px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+  transition: background 0.2s ease, width 0.2s ease;
 }
 
-.brand { display: flex; align-items: center; gap: 10px; }
-.brandMark { width: 30px; height: 30px; flex-shrink: 0; }
-.brandText { display: flex; flex-direction: column; line-height: 1.1; }
-
-.brandName {
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+.sidebarCollapsed {
+  width: 76px;
 }
 
-.brandSub {
-  font-size: 10px;
-  letter-spacing: 0.14em;
+/* ---------------------------------- Botão expandir/retrair ---------------- */
+.toggleRow {
+  display: flex;
+  justify-content: flex-start;
+}
+.sidebarCollapsed .toggleRow {
+  justify-content: center;
+}
+
+.toggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.06);
   color: var(--inverse-text-dim);
-  text-transform: uppercase;
-  margin-top: 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.toggleButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--inverse-text);
 }
 
-.nav { display: flex; flex-direction: column; gap: 2px; }
+/* ---------------------------------- Navegação ----------------------------- */
+.nav { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
 
 .navItem {
-  display: flex; align-items: center; gap: 11px;
-  padding: 10px 12px; border-radius: 8px;
-  font-size: 13.5px; color: var(--inverse-text-dim);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--inverse-text-dim);
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
   transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navIcon { flex-shrink: 0; }
+
+.navLabel {
+  display: inline-block;
+  opacity: 1;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity 0.15s ease, max-width 0.2s ease;
+}
+
+.sidebarCollapsed .navLabel {
+  opacity: 0;
+  max-width: 0;
 }
 
 .navItem:hover {
@@ -47,11 +87,25 @@
 
 .navItemActive { background: var(--accent-violet); color: #ffffff; }
 
+/* ---------------------------------- Rodapé --------------------------------- */
 .navFooter {
   margin-top: auto;
   border-top: 1px solid rgba(255,255,255,0.1);
-  padding-top: 18px; font-size: 11.5px;
-  color: var(--inverse-text-dim); line-height: 1.5;
+  padding-top: 18px;
+  overflow: hidden;
+}
+.navFooterText {
+  display: block;
+  font-size: 11.5px;
+  color: var(--inverse-text-dim);
+  line-height: 1.5;
+  opacity: 1;
+  max-height: 60px;
+  transition: opacity 0.15s ease, max-height 0.2s ease;
+}
+.sidebarCollapsed .navFooterText {
+  opacity: 0;
+  max-height: 0;
 }
 
 @media (max-width: 720px) {

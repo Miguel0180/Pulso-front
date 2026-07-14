@@ -1,42 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 .page {
-  --ink-900: #16202b; --ink-700: #3c4a58; --ink-500: #6b7a89; --ink-300: #a7b3bd;
-  --surface-0: #eef1f3; --surface-1: #f7f8f9; --surface-2: #ffffff; --line: #dde3e7;
-  --accent-violet: #6a5aa8; --accent-violet-soft: #efecf8;
-  --state-good: #2f6f62; --state-good-soft: #e3efec;
-  --state-watch: #b3792f; --state-watch-soft: #f6ecdc;
-  --state-critical: #b0473d; --state-critical-soft: #f7e6e3;
-  --inverse-bg-1: #16202b; --inverse-bg-2: #26314a;
-  --inverse-text: #f7f8f9; --inverse-text-dim: #a7b3bd;
-  --font-display: 'Fraunces', serif; --font-body: 'Inter', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  /* ---- Tokens do Design System (Pulso Ético) ---- */
+  --ink-900: #1e1b2e; --ink-700: #4b4760; --ink-500: #726c87; --ink-300: #a29cb3;
+  --surface-0: #f8fafc; --surface-1: #ffffff; --surface-2: #ffffff; --line: #e2e8f0;
+  --accent-violet: #6d28d9; --accent-violet-dark: #4c1d95; --accent-violet-medium: #9664e4;
+  --accent-violet-soft: #ede9fe; --accent-violet-tint: #f5f3ff;
+  --state-good: #16a34a; --state-good-soft: #dcfce7;
+  --state-watch: #eab308; --state-watch-soft: #fef9c3;
+  --state-critical: #dc2626; --state-critical-soft: #fee2e2;
+  --inverse-bg-1: #1e1b2e; --inverse-bg-2: #2f2750;
+  --inverse-text: #f8fafc; --inverse-text-dim: #a29cb3;
+  --font-display: 'Inter', system-ui, sans-serif; --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'Inter', system-ui, sans-serif;
 
   background: var(--surface-0); color: var(--ink-900);
   font-family: var(--font-body); min-height: 100vh;
-  display: grid; grid-template-columns: 248px 1fr;
-  transition: background 0.2s ease, color 0.2s ease;
+  display: grid; grid-template-columns: var(--sidebar-width, 248px) 1fr;
+  transition: background 0.2s ease, color 0.2s ease, grid-template-columns 0.2s ease;
 }
 
-/* 👇 AQUI ESTAVA O PROBLEMA: alterado de "dark" para "escuro" */
 .page[data-theme="escuro"] {
-  --ink-900: #eef2f6; --ink-700: #b8c3ce; --ink-500: #8695a4; --ink-300: #57677a;
-  --surface-0: #0d131b; --surface-1: #151d27; --surface-2: #1c2632; --line: #2a3644;
-  --accent-violet: #a596e0; --accent-violet-soft: rgba(165, 150, 224, 0.14);
-  --state-good: #5cb09d; --state-good-soft: rgba(92, 176, 157, 0.14);
-  --state-watch: #e0a35c; --state-watch-soft: rgba(224, 163, 92, 0.14);
-  --state-critical: #e0806f; --state-critical-soft: rgba(224, 128, 111, 0.14);
-  --inverse-bg-1: #0a0e14; --inverse-bg-2: #1a2438;
-  --inverse-text: #f7f8f9; --inverse-text-dim: #93a1af;
+  --ink-900: #f3f1fa; --ink-700: #c7c2d9; --ink-500: #948fa8; --ink-300: #5d5876;
+  --surface-0: #14121f; --surface-1: #1c1930; --surface-2: #221d3a; --line: #322c4c;
+  --accent-violet: #a78bfa; --accent-violet-dark: #c4b5fd; --accent-violet-medium: #8b5cf6;
+  --accent-violet-soft: rgba(167, 139, 250, 0.16); --accent-violet-tint: rgba(167, 139, 250, 0.08);
+  --state-good: #4ade80; --state-good-soft: rgba(74, 222, 128, 0.14);
+  --state-watch: #fcd34d; --state-watch-soft: rgba(252, 211, 77, 0.14);
+  --state-critical: #f87171; --state-critical-soft: rgba(248, 113, 113, 0.14);
+  --inverse-bg-1: #0a0816; --inverse-bg-2: #1a1530;
+  --inverse-text: #f8fafc; --inverse-text-dim: #948fa8;
 }
 
-.main { padding: 32px 40px 60px; max-width: 1240px; }
+.main { padding: 32px 40px 60px; max-width: 1240px; margin: 0 auto; width: 100%; box-sizing: border-box; }
 
 /* ---------------------------------- KPI row ------------------------------ */
 .kpiRow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
 .kpiCard { background: var(--surface-1); border: 1px solid var(--line); border-radius: 14px; padding: 18px 20px; }
 .kpiLabel { font-size: 12px; color: var(--ink-500); margin-bottom: 10px; }
-.kpiValue { font-family: var(--font-mono); font-size: 26px; font-weight: 500; color: var(--ink-900); }
+.kpiValue { font-family: var(--font-mono); font-size: 26px; font-weight: 600; color: var(--ink-900); }
 .kpiDelta { font-size: 11.5px; margin-top: 6px; font-weight: 500; }
 .deltaGood { color: var(--state-good); }
 .deltaWatch { color: var(--state-watch); }
@@ -78,7 +80,7 @@
 .table td { padding: 12px 10px; font-size: 13px; border-bottom: 1px solid var(--line); color: var(--ink-700); }
 .table tr:last-child td { border-bottom: none; }
 .tableNameCell { display: flex; align-items: center; gap: 10px; }
-.miniAvatar { width: 28px; height: 28px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--ink-700); flex-shrink: 0; }
+.miniAvatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-violet-tint); border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent-violet-dark); flex-shrink: 0; }
 .tableEmployeeName { font-weight: 600; color: var(--ink-900); font-size: 13px; }
 .tableEmployeeRole { font-size: 11.5px; color: var(--ink-500); }
 
@@ -86,7 +88,12 @@
 .pillGood { background: var(--state-good-soft); color: var(--state-good); }
 .pillWatch { background: var(--state-watch-soft); color: var(--state-watch); }
 .pillCritical { background: var(--state-critical-soft); color: var(--state-critical); }
-.addButton { font-size: 12.5px; font-weight: 600; color: #ffffff; background: var(--ink-900); border: none; border-radius: 8px; padding: 9px 15px; cursor: pointer; }
+.addButton {
+  font-size: 12.5px; font-weight: 600; color: #ffffff; background: var(--accent-violet);
+  border: none; border-radius: 999px; padding: 9px 16px; cursor: pointer;
+  transition: background 0.15s ease;
+}
+.addButton:hover { background: var(--accent-violet-dark); }
 
 /* ---------------------------------- IA recomendações ---------------------- */
 .aiPanel { background: linear-gradient(155deg, var(--inverse-bg-1) 0%, var(--inverse-bg-2) 100%); color: var(--inverse-text); border-radius: 16px; padding: 22px 24px; }
@@ -96,7 +103,7 @@
 .aiItem { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 13px 15px; }
 .aiItemTitle { font-size: 12.5px; font-weight: 600; margin-bottom: 4px; color: #ffffff; }
 .aiItemBody { font-size: 12px; color: var(--inverse-text-dim); line-height: 1.5; }
-.aiItemTag { display: inline-block; margin-top: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: #c9bdf0; }
+.aiItemTag { display: inline-block; margin-top: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--accent-violet-medium); }
 
 /* ---------------------------------- Responsive ---------------------------- */
 @media (max-width: 1080px) {

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import styles from "./header.module.css";
 import ButtonTheme from "./button-theme";
 
@@ -25,13 +26,15 @@ interface HeaderProps {
 export default function Header({ tema, toggleTema, denunciasAbertas, actions }: HeaderProps) {
   return (
     <header className={styles.topbar}>
-      <div>
-        <div className={styles.eyebrow}>
-          <span className={styles.eyebrowDot} />
-          Visão geral
-        </div>
-        <h1 className={styles.greeting}>Olá, Miguel</h1>
-        <p className={styles.dateLine}>Segunda-feira, 13 de julho de 2026</p>
+      <div className={styles.headerLogoBox}>
+        <Image
+          src="/logo.png"
+          alt="Ético"
+          fill
+          sizes="160px"
+          className={styles.headerLogo}
+          priority
+        />
       </div>
 
       <div className={styles.topbarActions}>

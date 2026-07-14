@@ -3,7 +3,14 @@
   padding-bottom: 22px; margin-bottom: 28px;
   border-bottom: 1px solid var(--line);
 }
-
+.headerLogoBox {
+  position: relative;
+  width: 130px;
+  height: 36px;
+}
+.headerLogo {
+  object-fit: contain;
+}
 .eyebrow {
   display: flex; align-items: center; gap: 7px;
   font-size: 11px; font-weight: 600; letter-spacing: 0.09em;

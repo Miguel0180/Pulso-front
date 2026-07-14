@@ -3,7 +3,6 @@
 import styles from "./gestao.module.css";
 import Menu from "../components/menu";
 import Header from "../components/header";
-// Importação do contexto global
 import { useTheme } from "../context/ThemeContext";
 
 type Estado = "bom" | "atencao" | "critico";
@@ -127,7 +126,6 @@ function PulseLine({ pontos, estado }: { pontos: number[]; estado: Estado }) {
 }
 
 export default function Dashboard() {
-  // Substituído o useState local pela chamada do contexto global
   const { tema, toggleTema } = useTheme();
 
   const totalColaboradores = setores.reduce((acc, s) => acc + s.colaboradores, 0);
@@ -136,18 +134,13 @@ export default function Dashboard() {
   const denunciasAbertas = alertas.filter((a) => a.estado === "critico").length;
 
   return (
-    // Ajustado o data-theme para injetar a variável global corretamente
     <div className={styles.page} data-theme={tema}>
-      
-      {/* Menu Lateral Componentizado */}
       <Menu />
 
       <main className={styles.main}>
-        
-        {/* Header Componentizado enviando as funções do Tema global por Props */}
-        <Header 
-          tema={tema} 
-          toggleTema={toggleTema} 
+        <Header
+          tema={tema}
+          toggleTema={toggleTema}
           denunciasAbertas={denunciasAbertas}
         />
 
@@ -233,7 +226,7 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td>{c.setor}</td>
-                      <td style={{ fontFamily: "var(--font-mono)" }}>{c.jornadaMedia}</td>
+                      <td>{c.jornadaMedia}</td>
                       <td>{c.ultimoQuestionario}</td>
                       <td>
                         <span className={pillClass(c.estado)}>{estadoLabel[c.estado]}</span>

@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.page {
+  --ink-900: #1e1b2e; --ink-700: #4b4760; --ink-500: #726c87; --ink-300: #a29cb3;
+  --surface-0: #f8fafc; --surface-1: #ffffff; --surface-2: #ffffff; --line: #e2e8f0;
+  --accent-violet: #6d28d9; --accent-violet-dark: #4c1d95; --accent-violet-medium: #9664e4;
+  --accent-violet-soft: #ede9fe; --accent-violet-tint: #f5f3ff;
+  --state-critical: #dc2626; --state-critical-soft: #fee2e2;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  background: var(--surface-0); color: var(--ink-900);
+  font-family: var(--font-body); min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.page[data-theme="escuro"] {
+  --ink-900: #f3f1fa; --ink-700: #c7c2d9; --ink-500: #948fa8; --ink-300: #5d5876;
+  --surface-0: #14121f; --surface-1: #1c1930; --surface-2: #221d3a; --line: #322c4c;
+  --accent-violet: #a78bfa; --accent-violet-dark: #c4b5fd; --accent-violet-medium: #8b5cf6;
+  --accent-violet-soft: rgba(167, 139, 250, 0.16); --accent-violet-tint: rgba(167, 139, 250, 0.08);
+  --state-critical: #f87171; --state-critical-soft: rgba(248, 113, 113, 0.14);
+}
+
+.shell { width: 100%; max-width: 380px; }
+
+.brandRow { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 28px; }
+.brandMark { width: 28px; height: 28px; flex-shrink: 0; }
+.brandName { font-size: 15px; font-weight: 600; color: var(--ink-900); }
+
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px;
+}
+
+.title { font-size: 20px; font-weight: 600; color: var(--ink-900); }
+.subtitle { margin-top: 6px; font-size: 13px; color: var(--ink-500); line-height: 1.5; }
+
+.form { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+
+.field { display: block; }
+.fieldTop { display: flex; align-items: center; justify-content: space-between; }
+.fieldLabel { font-size: 12.5px; font-weight: 500; color: var(--ink-700); }
+
+.forgotLink { font-size: 12px; color: var(--accent-violet); text-decoration: none; font-weight: 500; }
+.forgotLink:hover { color: var(--accent-violet-dark); }
+
+.inputWrap { position: relative; margin-top: 6px; }
+.inputIcon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-300); pointer-events: none; }
+
+.input {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--ink-900);
+  background: var(--surface-2);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px 10px 36px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input::placeholder { color: var(--ink-300); }
+.input:focus { border-color: var(--accent-violet); box-shadow: 0 0 0 3px var(--accent-violet-soft); }
+
+.checkboxRow { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--ink-700); }
+.checkbox { width: 14px; height: 14px; border-radius: 4px; accent-color: var(--accent-violet); }
+
+.submitButton {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 13.5px; font-weight: 600; color: #ffffff;
+  background: var(--accent-violet);
+  border: none; border-radius: 999px;
+  padding: 11px 20px; cursor: pointer; text-decoration: none;
+  transition: background 0.15s ease;
+}
+.submitButton:hover { background: var(--accent-violet-dark); }
+
+.footerText { margin-top: 24px; text-align: center; font-size: 13px; color: var(--ink-500); }
+.footerText a { font-weight: 500; color: var(--accent-violet); text-decoration: none; }
+.footerText a:hover { color: var(--accent-violet-dark); }
