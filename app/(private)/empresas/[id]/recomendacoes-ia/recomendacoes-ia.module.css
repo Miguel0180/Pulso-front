@@ -1,0 +1,276 @@
+.sectionHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary, #1f1f26);
+  margin: 0 0 6px;
+}
+
+.sectionSubtitle {
+  font-size: 14px;
+  color: var(--text-secondary, #6b6b76);
+  margin: 0;
+  line-height: 1.45;
+  max-width: 560px;
+}
+
+.panel {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #ececf2);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+  margin-bottom: 20px;
+}
+
+.panelTitulo {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f26);
+  margin: 0 0 4px;
+}
+
+.panelHint {
+  font-size: 13px;
+  color: var(--text-tertiary, #9a9aa5);
+  margin: 0 0 16px;
+}
+
+.filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filtroBtn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border-color, #e4e4ea);
+  background: transparent;
+  color: var(--text-secondary, #6b6b76);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.filtroBtn:hover {
+  border-color: #7c3aed;
+  color: #7c3aed;
+}
+
+.filtroAtivo {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  color: #ffffff;
+}
+
+.filtroAtivo:hover {
+  color: #ffffff;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.item {
+  border: 1px solid var(--border-color, #ececf2);
+  border-radius: 14px;
+  padding: 16px 18px;
+  background: var(--item-bg, #fbfbfd);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.item:hover {
+  border-color: #d9c7fb;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.08);
+}
+
+.itemTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.itemData {
+  font-size: 12px;
+  color: var(--text-tertiary, #9a9aa5);
+}
+
+.itemMensagem {
+  font-size: 14px;
+  color: var(--text-primary, #1f1f26);
+  line-height: 1.55;
+  margin: 0 0 14px;
+}
+
+.itemRodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color, #efeff4);
+  flex-wrap: wrap;
+}
+
+.pillTipo {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+}
+
+.pillPendente {
+  background: #fff4dd;
+  color: #b57b12;
+}
+
+.pillReconhecida {
+  background: #e9f7ee;
+  color: #2f9e58;
+}
+
+.reconhecerBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #7c3aed;
+  border: none;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.reconhecerBtn:hover:not(:disabled) {
+  background: #6b2fd6;
+}
+
+.reconhecerBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vazioBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 48px 20px;
+  color: var(--text-tertiary, #9a9aa5);
+  text-align: center;
+}
+
+.vazio {
+  font-size: 14px;
+  margin: 0;
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.carregandoTexto {
+  color: var(--text-secondary, #6b6b76);
+  font-size: 14px;
+  padding: 12px 0;
+}
+
+.msgErro {
+  color: #d64b2a;
+  font-size: 13px;
+  background: #fdeeea;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+
+.msgSucesso {
+  color: #2f9e58;
+  font-size: 13px;
+  background: #e9f7ee;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+
+.acessoRestrito {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 24px;
+  text-align: center;
+  color: var(--text-secondary, #6b6b76);
+}
+
+.acessoRestritoIcone {
+  color: #7c3aed;
+  opacity: 0.85;
+}
+
+.acessoRestritoTitulo {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f26);
+  margin: 0;
+}
+
+.select {
+  border: 1px solid var(--border-color, #e4e4ea);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 400;
+  color: var(--text-primary, #1f1f26);
+  background: var(--color-input-bg, #fbfbfd);
+  min-width: 220px;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blocoLabel {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-tertiary, #9a9aa5);
+}

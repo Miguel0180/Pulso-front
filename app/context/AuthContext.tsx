@@ -33,6 +33,7 @@ interface AuthContextType {
   login: (credenciais: Credenciais, manterConectado?: boolean) => Promise<ResultadoAuth>;
   cadastrar: (dados: CadastroDados) => Promise<ResultadoAuth>;
   confirmarCodigo: (token: string, usuario: Usuario) => void;
+  atualizarToken: (novoToken: string) => void;
   logout: () => Promise<void>;
 }
 
@@ -167,6 +168,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     salvarSessao(novoToken, novoUsuario, manterConectado);
   }
 
+  function atualizarToken(novoToken: string) {
+    const manterConectado = window.localStorage.getItem(CHAVE_MANTER) === "1";
+    const storage = manterConectado ? window.localStorage : window.sessionStorage;
+    storage.setItem(CHAVE_TOKEN, novoToken);
+    setToken(novoToken);
+  }
+
   async function logout() {
     const tokenAtual = token ?? lerStorage(CHAVE_TOKEN);
 
@@ -189,7 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, carregando, login, cadastrar, confirmarCodigo, logout }}
+      value={{ user, token, carregando, login, cadastrar, confirmarCodigo, atualizarToken, logout }}
     >
       {children}
     </AuthContext.Provider>
