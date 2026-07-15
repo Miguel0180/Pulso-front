@@ -8,6 +8,25 @@
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
 }
 
+.novaBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #7c3aed;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.novaBtn:hover {
+  background: #6b2fd6;
+}
+
 /* ---------- Filtros ---------- */
 
 .filtros {
@@ -44,7 +63,7 @@
   color: #ffffff;
 }
 
-/* ---------- Lista de denúncias ---------- */
+/* ---------- Lista de aplicações ---------- */
 
 .lista {
   list-style: none;
@@ -60,7 +79,7 @@
   border-radius: 14px;
   padding: 16px 18px;
   background: var(--item-bg, #fbfbfd);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .item:hover {
@@ -72,7 +91,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .itemData {
@@ -102,11 +123,22 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border-color, #efeff4);
+  flex-wrap: wrap;
 }
 
-.itemSetor {
+.itemMetaGrupo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.itemMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 13px;
   color: var(--text-tertiary, #9a9aa5);
 }
@@ -133,9 +165,10 @@
 
 /* ---------- Pills de status ---------- */
 
-.pillAberta,
-.pillAndamento,
-.pillRespondida,
+.pillAgendado,
+.pillAtivo,
+.pillEncerrado,
+.pillCancelado,
 .pillNeutro {
   display: inline-block;
   font-size: 12px;
@@ -145,19 +178,24 @@
   text-transform: capitalize;
 }
 
-.pillAberta {
-  background: #fdeeea;
-  color: #d64b2a;
-}
-
-.pillAndamento {
+.pillAgendado {
   background: #fff4dd;
   color: #b57b12;
 }
 
-.pillRespondida {
+.pillAtivo {
   background: #e9f7ee;
   color: #2f9e58;
+}
+
+.pillEncerrado {
+  background: #eeeef2;
+  color: #6b6b76;
+}
+
+.pillCancelado {
+  background: #fdeeea;
+  color: #d64b2a;
 }
 
 .pillNeutro {
@@ -191,10 +229,13 @@
 .msgErro {
   color: #d64b2a;
   font-size: 13px;
+  background: #fdeeea;
+  border-radius: 8px;
+  padding: 8px 12px;
   margin: 8px 0;
 }
 
-/* ---------- Painel lateral (drawer) de resposta ---------- */
+/* ---------- Painel lateral (drawer) ---------- */
 
 .overlay {
   position: fixed;
@@ -213,7 +254,7 @@
 
 .painel {
   width: 100%;
-  max-width: 460px;
+  max-width: 480px;
   height: 100%;
   background: var(--card-bg, #ffffff);
   box-shadow: -8px 0 30px rgba(16, 24, 40, 0.12);
@@ -268,7 +309,12 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
+}
+
+.blocoDescricao {
+  display: flex;
+  flex-direction: column;
 }
 
 .blocoLabel {
@@ -289,27 +335,65 @@
   white-space: pre-wrap;
 }
 
-.blocoResposta {
+/* ---------- Formulário (nova aplicação) ---------- */
+
+.campo {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary, #1f1f26);
 }
 
-.textarea {
-  width: 100%;
+.linhaDupla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.input,
+.select {
   border: 1px solid var(--border-color, #e4e4ea);
-  border-radius: 12px;
-  padding: 12px 14px;
+  border-radius: 10px;
+  padding: 10px 12px;
   font-size: 14px;
   font-family: inherit;
+  font-weight: 400;
   color: var(--text-primary, #1f1f26);
-  resize: vertical;
-  margin-bottom: 10px;
-  transition: border-color 0.15s ease;
+  background: var(--color-input-bg, #fbfbfd);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.textarea:focus {
+.input:focus,
+.select:focus {
   outline: none;
   border-color: #7c3aed;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.12);
+}
+
+.input:disabled,
+.select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.previewModelo {
+  background: var(--item-bg, #fbfbfd);
+  border: 1px solid var(--border-color, #ececf2);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.previewLista {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--text-primary, #1f1f26);
 }
 
 .enviarBtn {
@@ -326,7 +410,7 @@
   border-radius: 10px;
   cursor: pointer;
   align-self: flex-start;
-  transition: background 0.15s ease, opacity 0.15s ease;
+  transition: background 0.15s ease;
 }
 
 .enviarBtn:hover {
@@ -334,6 +418,33 @@
 }
 
 .enviarBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.encerrarBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: transparent;
+  color: #d64b2a;
+  border: 1px solid #d64b2a;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  align-self: flex-start;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.encerrarBtn:hover {
+  background: #d64b2a;
+  color: #ffffff;
+}
+
+.encerrarBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import Sidebar from "../../../../components/menu";
 import Header from "../../../../components/header";
 import { useTheme } from "../../../../context/ThemeContext";
 import { useAuth } from "../../../../context/AuthContext";
 import { API_URL } from "@/lib/api";
-import { MessageSquareWarning, Send, X } from "lucide-react";
+import { MessageSquareWarning, Send, X, ArrowUpRight, Plus } from "lucide-react";
 
 import pageStyles from "../dashboard/gestao.module.css";
 import styles from "./denuncias.module.css";
@@ -229,13 +230,23 @@ export default function DenunciasPage() {
       <main className={pageStyles.main}>
         <Header tema={tema} toggleTema={toggleTema} denunciasAbertas={totalAbertas} />
 
-        <div className={pageStyles.sectionHeader}>
+        <div className={pageStyles.sectionHeader} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <h2 className={pageStyles.sectionTitle}>Denúncias</h2>
             <p className={pageStyles.sectionSubtitle}>
               Acompanhe e responda as denúncias enviadas pela equipe.
             </p>
           </div>
+          
+          {/* Botão de redirecionamento dinâmico para nova denúncia */}
+          <Link 
+            href={`/empresas/${empresaId}/denuncias/nova`}
+            className={styles.enviarBtn} 
+            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', width: 'auto' }}
+          >
+            <Plus size={16} />
+            Nova Denúncia
+          </Link>
         </div>
 
         <div className={styles.panel}>
@@ -263,7 +274,7 @@ export default function DenunciasPage() {
             </button>
           </div>
 
-          {carregando && <p>Carregando denúncias...</p>}
+          {carregando && <p className={styles.carregandoTexto}>Carregando denúncias...</p>}
           {erro && <p className={styles.msgErro}>{erro}</p>}
 
           {!carregando && !erro && (
@@ -275,25 +286,26 @@ export default function DenunciasPage() {
             ) : (
               <ul className={styles.lista}>
                 {denunciasFiltradas.map((d) => (
-                  <li
-                    key={d.id}
-                    className={styles.item}
-                    onClick={() => setSelecionada(d)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        setSelecionada(d);
-                      }
-                    }}
-                  >
+                  <li key={d.id} className={styles.item}>
                     <div className={styles.itemTopo}>
                       <span className={statusClasse(d.status)}>{d.status}</span>
                       <span className={styles.itemData}>{formatarData(d.criadoEm)}</span>
                     </div>
+
                     <div className={styles.itemTipo}>{d.tipo}</div>
                     <p className={styles.itemDescricao}>{d.descricao}</p>
-                    <div className={styles.itemSetor}>Setor: {d.setorNome}</div>
+
+                    <div className={styles.itemRodape}>
+                      <div className={styles.itemSetor}>Setor: {d.setorNome}</div>
+                      <button
+                        type="button"
+                        className={styles.abrirBtn}
+                        onClick={() => setSelecionada(d)}
+                      >
+                        Abrir denúncia
+                        <ArrowUpRight size={16} />
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>

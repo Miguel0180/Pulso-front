@@ -9,7 +9,7 @@ import { useAuth } from "../../../../../context/AuthContext";
 import { API_URL } from "@/lib/api";
 import { Send, CheckCircle2 } from "lucide-react";
 
-import pageStyles from "../dashboard/gestao.module.css";
+import pageStyles from "../../dashboard/gestao.module.css";
 import styles from "./nova-denuncia.module.css";
 
 /**
