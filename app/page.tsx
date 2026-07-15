@@ -36,7 +36,7 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: "Recomendações da IA",
+    title: "Recomendações",
     body: "Ações sugeridas a partir dos dados, priorizadas por urgência — para o RH saber por onde começar.",
   },
   {
@@ -124,7 +124,7 @@ export default function LandingPage() {
       {/* -------------------------------- Navegação -------------------------------- */}
       <header className={styles.nav}>
         <div className={styles.navBrand}>
-          <Image src="/logo.png" alt="Ético" width={100} height={28} priority />
+          <Image src="/logo-black.png" alt="Pulso Ético" width={100} height={28} priority />
         </div>
         <nav className={styles.navLinks}>
           <a href="#produto">Produto</a>
@@ -259,7 +259,7 @@ export default function LandingPage() {
       {/* ----------------------------------- Footer ------------------------------------ */}
       <footer className={styles.footer}>
         <div className={styles.footerBrand}>
-          <Image src="/logo.png" alt="Ético" width={90} height={26} />
+          <Image src="/logo-black.png" alt="Pulso Ético" width={90} height={26} />
           <p className={styles.footerTag}>Gestão de riscos psicossociais para empresas brasileiras.</p>
         </div>
 

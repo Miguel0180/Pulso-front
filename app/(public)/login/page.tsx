@@ -121,8 +121,11 @@ export default function LoginPage() {
                 checked={manterConectado}
                 onChange={(e) => setManterConectado(e.target.checked)}
               />
-              Manter conectado por 30 dias
+              Manter conectado
             </label>
+            <p className={styles.deviceHint}>
+              Neste dispositivo, após verificar o e-mail uma vez, o login fica confiável por até 90 dias.
+            </p>
 
             <button type="submit" className={styles.submitButton} disabled={carregando}>
               {carregando ? (

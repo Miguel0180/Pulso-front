@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext";
+import SkipLink from "../components/skip-link";
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   const { token, carregando } = useAuth();
@@ -14,9 +15,14 @@ export default function PrivateLayout({ children }: { children: React.ReactNode 
     }
   }, [carregando, token, router]);
 
-  // Enquanto ainda não sabemos se há sessão salva, ou se já sabemos que não há,
-  // não renderiza a página protegida (evita "piscar" conteúdo privado).
   if (carregando || !token) return null;
 
-  return <>{children}</>;
+  return (
+    <>
+      <SkipLink />
+      <div id="conteudo-principal" tabIndex={-1}>
+        {children}
+      </div>
+    </>
+  );
 }

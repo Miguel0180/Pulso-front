@@ -1,44 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import styles from "./gestao.module.css";
 import Menu from "../../../../components/menu";
 import Header from "../../../../components/header";
 import { useTheme } from "../../../../context/ThemeContext";
 import { useAuth } from "../../../../context/AuthContext";
+import { useEmpresa } from "../../../../context/EmpresaContext";
 import { API_URL } from "@/lib/api";
-import { Copy, Check, KeyRound } from "lucide-react";
+import {
+  Copy,
+  Check,
+  KeyRound,
+  ClipboardList,
+  Clock,
+  AlertTriangle,
+  Settings,
+} from "lucide-react";
 
 type Estado = "bom" | "atencao" | "critico";
 
-interface Setor {
+type NivelHumor =
+  | "MUITO_BEM"
+  | "BEM"
+  | "CANSADO"
+  | "SOBRECARREGADO"
+  | "PRECISA_AJUDA";
+
+interface DashboardResumo {
+  colaboradoresAtivos: number;
+  scoreMedioBemEstar: number;
+}
+
+interface SetorStatus {
+  setorId: number;
+  setorNome: string;
+  quantidadeColaboradores: number;
+  scoreBemEstar: number;
+  statusLabel: string;
+  tendenciaBemEstar: number[];
+}
+
+interface AlertaApi {
+  id: number;
+  origem: string;
+  setorNome: string;
+  mensagem: string;
+  criadoEm: string;
+}
+
+interface RecomendacaoApi {
+  id: number;
+  mensagem: string;
+  tipo: string;
+  reconhecida: boolean;
+  criadoEm: string;
+  setorNome?: string;
+}
+
+interface Membro {
+  id: number;
   nome: string;
-  colaboradores: number;
-  score: number;
-  estado: Estado;
-  pulso: number[];
-}
-
-interface Colaborador {
-  nome: string;
-  cargo: string;
-  setor: string;
-  jornadaMedia: string;
-  ultimoQuestionario: string;
-  estado: Estado;
-}
-
-interface Alerta {
-  texto: string;
-  tempo: string;
-  estado: Estado;
-}
-
-interface Recomendacao {
-  titulo: string;
-  corpo: string;
-  tag: string;
+  cargoNome: string;
+  setorNome: string;
 }
 
 interface CodigoConvite {
@@ -48,64 +74,47 @@ interface CodigoConvite {
   expiraEm: string;
 }
 
-const setores: Setor[] = [
-  { nome: "Comercial", colaboradores: 34, score: 82, estado: "bom", pulso: [40, 42, 41, 43, 42, 44, 43, 45, 44, 46] },
-  { nome: "Operações", colaboradores: 58, score: 61, estado: "atencao", pulso: [40, 46, 38, 50, 36, 48, 34, 44, 38, 42] },
-  { nome: "TI", colaboradores: 21, score: 74, estado: "bom", pulso: [42, 40, 44, 41, 43, 40, 45, 42, 41, 44] },
-  { nome: "Atendimento", colaboradores: 46, score: 48, estado: "critico", pulso: [40, 52, 30, 56, 26, 58, 24, 54, 28, 50] },
-  { nome: "Financeiro", colaboradores: 17, score: 79, estado: "bom", pulso: [41, 43, 42, 44, 43, 45, 42, 44, 43, 45] },
+const LIMITE_MEMBROS = 8;
+const LIMITE_SETORES_RECS = 5;
+const LIMITE_RECS = 5;
+
+const NIVEIS_HUMOR: { valor: NivelHumor; label: string; emoji: string }[] = [
+  { valor: "MUITO_BEM", label: "Muito bem", emoji: "😄" },
+  { valor: "BEM", label: "Bem", emoji: "🙂" },
+  { valor: "CANSADO", label: "Cansado", emoji: "😮‍💨" },
+  { valor: "SOBRECARREGADO", label: "Sobrecarregado", emoji: "😰" },
+  { valor: "PRECISA_AJUDA", label: "Precisa de ajuda", emoji: "🆘" },
 ];
 
-const colaboradores: Colaborador[] = [
-  { nome: "Marina Souza", cargo: "Analista Sênior", setor: "Comercial", jornadaMedia: "8h20", ultimoQuestionario: "Hoje", estado: "bom" },
-  { nome: "Pedro Lins", cargo: "Coordenador", setor: "Operações", jornadaMedia: "9h45", ultimoQuestionario: "Ontem", estado: "atencao" },
-  { nome: "Bianca Ferraz", cargo: "Atendente", setor: "Atendimento", jornadaMedia: "10h10", ultimoQuestionario: "3 dias atrás", estado: "critico" },
-  { nome: "Rafael Tude", cargo: "Dev. Backend", setor: "TI", jornadaMedia: "8h05", ultimoQuestionario: "Hoje", estado: "bom" },
-  { nome: "Camila Reis", cargo: "Analista Financeiro", setor: "Financeiro", jornadaMedia: "8h30", ultimoQuestionario: "2 dias atrás", estado: "bom" },
-  { nome: "João Prado", cargo: "Atendente", setor: "Atendimento", jornadaMedia: "9h50", ultimoQuestionario: "5 dias atrás", estado: "atencao" },
-];
-
-const alertas: Alerta[] = [
-  { texto: "Denúncia anônima registrada no setor Atendimento — assédio moral relatado por terceiros.", tempo: "há 2h", estado: "critico" },
-  { texto: "Setor Operações com 4 colaboradores sem responder ao questionário nos últimos 7 dias.", tempo: "há 6h", estado: "atencao" },
-  { texto: "Jornada média do setor Atendimento ultrapassou 10h por 3 dias seguidos.", tempo: "ontem", estado: "atencao" },
-  { texto: "Nova denúncia anônima recebida — categoria sobrecarga de trabalho.", tempo: "há 2 dias", estado: "critico" },
-];
-
-const recomendacoes: Recomendacao[] = [
-  {
-    titulo: "Reunião 1:1 sugerida — Atendimento",
-    corpo: "Score do setor caiu 12 pontos nas últimas 2 semanas. Recomendamos conversa com a liderança direta antes da próxima aplicação de questionário.",
-    tag: "Prioridade alta",
-  },
-  {
-    titulo: "Redistribuir carga — Operações",
-    corpo: "3 colaboradores concentram 40% das horas extras do setor. Redistribuir tarefas pode reduzir o risco de esgotamento.",
-    tag: "Carga horária",
-  },
-  {
-    titulo: "Campanha de escuta — geral",
-    corpo: "Taxa de resposta aos questionários caiu para 71%. Uma comunicação reforçando o anonimato tende a aumentar a adesão.",
-    tag: "Engajamento",
-  },
-];
-
-const estadoLabel: Record<Estado, string> = {
-  bom: "Estável",
-  atencao: "Atenção",
-  critico: "Crítico",
+const TIPO_LABEL: Record<string, string> = {
+  REDUZIR_HORAS_EXTRAS: "Reduzir horas extras",
+  REDISTRIBUIR_TAREFAS: "Redistribuir tarefas",
+  CONVERSA_COM_EQUIPE: "Conversa com a equipe",
+  APOIO_PSICOLOGICO: "Apoio psicológico",
+  TREINAMENTO_LIDERANCA: "Treinamento de liderança",
 };
 
-function badgeClass(estado: Estado) {
-  if (estado === "bom") return styles.badgeGood;
-  if (estado === "atencao") return styles.badgeWatch;
-  return styles.badgeCritical;
+function mapearEstado(label?: string): Estado {
+  const s = (label || "").toLowerCase();
+  if (s.includes("crít") || s.includes("crit") || s.includes("alto") || s.includes("ruim")) {
+    return "critico";
+  }
+  if (s.includes("aten") || s.includes("watch") || s.includes("médi") || s.includes("medi")) {
+    return "atencao";
+  }
+  return "bom";
 }
 
-function pillClass(estado: Estado) {
-  if (estado === "bom") return styles.pillGood;
-  if (estado === "atencao") return styles.pillWatch;
-  return styles.pillCritical;
+function estadoLabel(estado: Estado) {
+  if (estado === "bom") return "Estável";
+  if (estado === "atencao") return "Atenção";
+  return "Crítico";
+}
+
+function badgeClass(estado: Estado, stylesMap: typeof styles) {
+  if (estado === "bom") return stylesMap.badgeGood;
+  if (estado === "atencao") return stylesMap.badgeWatch;
+  return stylesMap.badgeCritical;
 }
 
 function scoreColor(estado: Estado) {
@@ -114,15 +123,42 @@ function scoreColor(estado: Estado) {
   return "var(--state-critical)";
 }
 
+function tempoRelativo(iso: string) {
+  try {
+    const diff = Date.now() - new Date(iso).getTime();
+    const min = Math.floor(diff / 60000);
+    if (min < 1) return "agora";
+    if (min < 60) return `há ${min} min`;
+    const h = Math.floor(min / 60);
+    if (h < 24) return `há ${h}h`;
+    const d = Math.floor(h / 24);
+    if (d === 1) return "ontem";
+    return `há ${d} dias`;
+  } catch {
+    return iso;
+  }
+}
+
+function iniciais(nome: string) {
+  return nome
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 function PulseLine({ pontos, estado }: { pontos: number[]; estado: Estado }) {
   const width = 220;
   const height = 36;
-  const max = Math.max(...pontos);
-  const min = Math.min(...pontos);
+  const serie = pontos.length >= 2 ? pontos : [0, 0];
+  const max = Math.max(...serie);
+  const min = Math.min(...serie);
   const range = max - min || 1;
-  const step = width / (pontos.length - 1);
+  const step = width / (serie.length - 1);
 
-  const path = pontos
+  const path = serie
     .map((p, i) => {
       const x = i * step;
       const y = height - ((p - min) / range) * (height - 8) - 4;
@@ -132,33 +168,297 @@ function PulseLine({ pontos, estado }: { pontos: number[]; estado: Estado }) {
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className={styles.pulseWrap} preserveAspectRatio="none">
-      <path d={path} fill="none" stroke={scoreColor(estado)} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d={path}
+        fill="none"
+        stroke={scoreColor(estado)}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-interface DashboardProps {
-  empresa?: unknown;
+/* ---------------- Check-in de humor (app) ---------------- */
+
+function CheckinHumor({
+  empresaId,
+  token,
+}: {
+  empresaId: string;
+  token: string | null;
+}) {
+  const [selecionado, setSelecionado] = useState<NivelHumor | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const [sucesso, setSucesso] = useState<string | null>(null);
+  const [erro, setErro] = useState<string | null>(null);
+
+  async function enviar(nivel: NivelHumor) {
+    setSelecionado(nivel);
+    setEnviando(true);
+    setErro(null);
+    setSucesso(null);
+    try {
+      const res = await fetch(`${API_URL}/api/app/empresas/${empresaId}/checkins-humor`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ nivelHumor: nivel }),
+      });
+
+      if (!res.ok) {
+        const corpo = await res.text().catch(() => "");
+        let mensagem = "Não foi possível registrar seu check-in agora.";
+        try {
+          const json = JSON.parse(corpo);
+          if (json?.mensagem) mensagem = json.mensagem;
+        } catch {
+          /* ignore */
+        }
+        setErro(mensagem);
+        return;
+      }
+
+      setSucesso("Check-in registrado. Obrigado por compartilhar!");
+    } catch {
+      setErro("Não foi possível conectar ao servidor.");
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <div className={`${styles.panel} ${styles.humorPanel}`}>
+      <div className={styles.panelHeader}>
+        <div>
+          <div className={styles.panelTitle}>Como você está hoje?</div>
+          <div className={styles.panelHint}>
+            Registre seu humor de forma anônima. Leva menos de 5 segundos.
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.humorOpcoes} role="group" aria-label="Nível de humor">
+        {NIVEIS_HUMOR.map((op) => (
+          <button
+            key={op.valor}
+            type="button"
+            className={`${styles.humorBtn} ${selecionado === op.valor ? styles.humorBtnAtivo : ""}`}
+            onClick={() => enviar(op.valor)}
+            disabled={enviando}
+            aria-pressed={selecionado === op.valor}
+          >
+            <span className={styles.humorEmoji} aria-hidden>
+              {op.emoji}
+            </span>
+            <span className={styles.humorLabel}>{op.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {sucesso && <p className={`${styles.humorMsg} ${styles.humorMsgOk}`}>{sucesso}</p>}
+      {erro && <p className={`${styles.humorMsg} ${styles.humorMsgErro}`}>{erro}</p>}
+    </div>
+  );
 }
 
-export default function Dashboard(_props: DashboardProps) {
-  const { tema, toggleTema } = useTheme();
-  const { token } = useAuth();
-  const params = useParams();
-  const empresaId = params?.id;
+/* ---------------- Visão colaborador ---------------- */
+
+function DashboardColaborador({
+  empresaId,
+  token,
+}: {
+  empresaId: string;
+  token: string | null;
+}) {
+  const { temPermissao } = useEmpresa();
+  const base = `/empresas/${empresaId}`;
+
+  const atalhos = [
+    {
+      href: `${base}/questionarios`,
+      titulo: "Questionários",
+      desc: "Responder formulários disponíveis para você",
+      show: temPermissao("RESPONDER_PESQUISAS", "GERENCIAR_PESQUISAS"),
+      icon: ClipboardList,
+    },
+    {
+      href: `${base}/ponto-jornada`,
+      titulo: "Ponto & Jornada",
+      desc: "Registrar entrada e saída",
+      show: temPermissao("REGISTRAR_PONTO", "GERENCIAR_JORNADAS"),
+      icon: Clock,
+    },
+    {
+      href: `${base}/denuncias/nova`,
+      titulo: "Denúncias",
+      desc: "Enviar um relato anônimo",
+      show: temPermissao("RESPONDER_DENUNCIAS", "GERENCIAR_DENUNCIAS"),
+      icon: AlertTriangle,
+    },
+    {
+      href: `${base}/configuracoes`,
+      titulo: "Configurações",
+      desc: "Acessibilidade e aparência",
+      show: true,
+      icon: Settings,
+    },
+  ].filter((a) => a.show);
+
+  return (
+    <>
+      <CheckinHumor empresaId={empresaId} token={token} />
+
+      <div className={styles.panel}>
+        <div className={styles.panelHeader}>
+          <div>
+            <div className={styles.panelTitle}>Atalhos</div>
+            <div className={styles.panelHint}>
+              Acesse as áreas disponíveis para você. Dados gerenciais não são exibidos nesta visão.
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.atalhosGrid}>
+          {atalhos.map((a) => {
+            const Icon = a.icon;
+            return (
+              <Link key={a.href} href={a.href} className={styles.atalhoCard}>
+                <Icon size={18} color="var(--accent-violet)" />
+                <span className={styles.atalhoTitulo}>{a.titulo}</span>
+                <span className={styles.atalhoDesc}>{a.desc}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ---------------- Visão gestão ---------------- */
+
+function DashboardGestao({
+  empresaId,
+  token,
+}: {
+  empresaId: string;
+  token: string | null;
+}) {
+  const [resumo, setResumo] = useState<DashboardResumo | null>(null);
+  const [setores, setSetores] = useState<SetorStatus[]>([]);
+  const [alertas, setAlertas] = useState<AlertaApi[]>([]);
+  const [membros, setMembros] = useState<Membro[]>([]);
+  const [recomendacoes, setRecomendacoes] = useState<RecomendacaoApi[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+  const [acessoNegado, setAcessoNegado] = useState(false);
 
   const [gerandoCodigo, setGerandoCodigo] = useState(false);
   const [codigoConvite, setCodigoConvite] = useState<CodigoConvite | null>(null);
   const [erroCodigo, setErroCodigo] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
 
-  const totalColaboradores = setores.reduce((acc, s) => acc + s.colaboradores, 0);
-  const scoreMedio = Math.round(setores.reduce((acc, s) => acc + s.score, 0) / setores.length);
-  const denunciasAbertas = alertas.filter((a) => a.estado === "critico").length;
+  const headers = useCallback(
+    () => ({ ...(token ? { Authorization: `Bearer ${token}` } : {}) }),
+    [token]
+  );
+
+  useEffect(() => {
+    if (!empresaId) return;
+    let cancelado = false;
+
+    async function carregar() {
+      setCarregando(true);
+      setErro(null);
+      setAcessoNegado(false);
+
+      try {
+        const [resResumo, resSetores, resAlertas, resMembros] = await Promise.all([
+          fetch(`${API_URL}/api/painel/empresas/${empresaId}/dashboard/resumo`, {
+            headers: headers(),
+          }),
+          fetch(`${API_URL}/api/painel/empresas/${empresaId}/dashboard/setores`, {
+            headers: headers(),
+          }),
+          fetch(`${API_URL}/api/painel/empresas/${empresaId}/dashboard/alertas?limite=10`, {
+            headers: headers(),
+          }),
+          fetch(`${API_URL}/api/empresas/${empresaId}/membros`, { headers: headers() }),
+        ]);
+
+        if (
+          resResumo.status === 401 ||
+          resResumo.status === 403 ||
+          resSetores.status === 401 ||
+          resSetores.status === 403
+        ) {
+          if (!cancelado) setAcessoNegado(true);
+          return;
+        }
+
+        if (!resResumo.ok || !resSetores.ok || !resAlertas.ok) {
+          if (!cancelado) setErro("Não foi possível carregar o dashboard.");
+          return;
+        }
+
+        const dadosResumo: DashboardResumo = await resResumo.json();
+        const dadosSetores: SetorStatus[] = await resSetores.json();
+        const dadosAlertas: AlertaApi[] = await resAlertas.json();
+
+        if (cancelado) return;
+
+        setResumo(dadosResumo);
+        const listaSetores = Array.isArray(dadosSetores) ? dadosSetores : [];
+        setSetores(listaSetores);
+        setAlertas(Array.isArray(dadosAlertas) ? dadosAlertas : []);
+
+        if (resMembros.ok) {
+          const dadosMembros: Membro[] = await resMembros.json();
+          setMembros(Array.isArray(dadosMembros) ? dadosMembros : []);
+        }
+
+        const setoresParaRecs = listaSetores.slice(0, LIMITE_SETORES_RECS);
+        if (setoresParaRecs.length > 0) {
+          const resultados = await Promise.all(
+            setoresParaRecs.map(async (s) => {
+              try {
+                const res = await fetch(
+                  `${API_URL}/api/painel/empresas/${empresaId}/recomendacoes/setor/${s.setorId}/pendentes`,
+                  { headers: headers() }
+                );
+                if (!res.ok) return [] as RecomendacaoApi[];
+                const lista: RecomendacaoApi[] = await res.json();
+                return (Array.isArray(lista) ? lista : []).map((r) => ({
+                  ...r,
+                  setorNome: s.setorNome,
+                }));
+              } catch {
+                return [] as RecomendacaoApi[];
+              }
+            })
+          );
+          if (!cancelado) {
+            setRecomendacoes(resultados.flat().slice(0, LIMITE_RECS));
+          }
+        }
+      } catch {
+        if (!cancelado) setErro("Não foi possível conectar ao servidor.");
+      } finally {
+        if (!cancelado) setCarregando(false);
+      }
+    }
+
+    carregar();
+    return () => {
+      cancelado = true;
+    };
+  }, [empresaId, headers]);
 
   async function gerarCodigoConvite() {
-    if (!empresaId) return;
-
     setGerandoCodigo(true);
     setErroCodigo(null);
     setCopiado(false);
@@ -166,9 +466,7 @@ export default function Dashboard(_props: DashboardProps) {
     try {
       const res = await fetch(`${API_URL}/api/empresas/${empresaId}/codigo-convite`, {
         method: "POST",
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: headers(),
       });
 
       if (!res.ok) {
@@ -192,7 +490,7 @@ export default function Dashboard(_props: DashboardProps) {
       setCopiado(true);
       setTimeout(() => setCopiado(false), 2000);
     } catch {
-      // clipboard indisponível, ignora silenciosamente
+      /* ignore */
     }
   }
 
@@ -209,188 +507,315 @@ export default function Dashboard(_props: DashboardProps) {
     }
   }
 
+  const membrosVisiveis = membros.slice(0, LIMITE_MEMBROS);
+  const base = `/empresas/${empresaId}`;
+
+  return (
+    <>
+      <CheckinHumor empresaId={empresaId} token={token} />
+
+      {acessoNegado && (
+        <p className={styles.codigoErro} style={{ marginBottom: 16 }}>
+          Você não tem permissão para ver o painel gerencial desta empresa.
+        </p>
+      )}
+
+      {erro && (
+        <p className={styles.codigoErro} style={{ marginBottom: 16 }}>
+          {erro}
+        </p>
+      )}
+
+      <section className={styles.kpiRow}>
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiLabel}>Colaboradores ativos</div>
+          <div className={styles.kpiValue}>
+            {carregando ? "—" : (resumo?.colaboradoresAtivos ?? 0)}
+          </div>
+        </div>
+        <div className={styles.kpiCard}>
+          <div className={styles.kpiLabel}>Score médio de bem-estar</div>
+          <div className={styles.kpiValue}>
+            {carregando
+              ? "—"
+              : resumo?.scoreMedioBemEstar != null
+                ? Math.round(resumo.scoreMedioBemEstar)
+                : "—"}
+          </div>
+        </div>
+
+        <div className={`${styles.kpiCard} ${styles.kpiCardAction}`}>
+          <div className={styles.kpiLabel}>Convidar colaboradores</div>
+
+          {!codigoConvite ? (
+            <button
+              type="button"
+              className={styles.gerarCodigoButton}
+              onClick={gerarCodigoConvite}
+              disabled={gerandoCodigo}
+            >
+              <KeyRound size={16} />
+              {gerandoCodigo ? "Gerando..." : "Gerar código de convite"}
+            </button>
+          ) : (
+            <div className={styles.codigoGerado}>
+              <div className={styles.codigoValor}>
+                {codigoConvite.codigo}
+                <button
+                  type="button"
+                  className={styles.copiarBotao}
+                  onClick={copiarCodigo}
+                  title="Copiar código"
+                  aria-label="Copiar código"
+                >
+                  {copiado ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </div>
+              <div className={styles.codigoExpira}>
+                Expira em {formatarExpiracao(codigoConvite.expiraEm)}
+              </div>
+              <button
+                type="button"
+                className={styles.gerarNovoLink}
+                onClick={gerarCodigoConvite}
+                disabled={gerandoCodigo}
+              >
+                {gerandoCodigo ? "Gerando..." : "Gerar novo código"}
+              </button>
+            </div>
+          )}
+
+          {erroCodigo && <div className={styles.codigoErro}>{erroCodigo}</div>}
+        </div>
+      </section>
+
+      <div className={styles.grid}>
+        <div>
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <div className={styles.panelTitle}>Status geral dos setores</div>
+                <div className={styles.panelHint}>
+                  A onda reflete a estabilidade do indicador de bem-estar no período
+                </div>
+              </div>
+              <Link className={styles.panelLink} href={`${base}/avaliacao-risco`}>
+                Ver avaliação completa
+              </Link>
+            </div>
+
+            {carregando && <p className={styles.panelHint}>Carregando setores...</p>}
+            {!carregando && setores.length === 0 && !acessoNegado && (
+              <p className={styles.panelHint}>Nenhum setor com dados de bem-estar ainda.</p>
+            )}
+
+            <div className={styles.sectorList}>
+              {setores.map((s) => {
+                const estado = mapearEstado(s.statusLabel);
+                const label = s.statusLabel || estadoLabel(estado);
+                return (
+                  <div className={styles.sectorRow} key={s.setorId}>
+                    <div>
+                      <span className={styles.sectorName}>{s.setorNome}</span>
+                      <span className={styles.sectorCount}>
+                        {s.quantidadeColaboradores} pessoas
+                      </span>
+                    </div>
+                    <PulseLine
+                      pontos={
+                        Array.isArray(s.tendenciaBemEstar) && s.tendenciaBemEstar.length > 0
+                          ? s.tendenciaBemEstar
+                          : [s.scoreBemEstar ?? 0, s.scoreBemEstar ?? 0]
+                      }
+                      estado={estado}
+                    />
+                    <div className={styles.sectorScore} style={{ color: scoreColor(estado) }}>
+                      {Math.round(s.scoreBemEstar ?? 0)}
+                    </div>
+                    <span className={`${styles.badge} ${badgeClass(estado, styles)}`}>
+                      {label}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div className={styles.panelTitle}>Colaboradores</div>
+              <Link className={styles.addButton} href={`${base}/colaboradores`}>
+                Ver todos
+              </Link>
+            </div>
+
+            {carregando && <p className={styles.panelHint}>Carregando colaboradores...</p>}
+            {!carregando && membrosVisiveis.length === 0 && (
+              <p className={styles.panelHint}>Nenhum colaborador cadastrado.</p>
+            )}
+
+            {membrosVisiveis.length > 0 && (
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Cargo</th>
+                    <th>Setor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {membrosVisiveis.map((m) => (
+                    <tr key={m.id}>
+                      <td>
+                        <div className={styles.tableNameCell}>
+                          <div className={styles.miniAvatar}>{iniciais(m.nome)}</div>
+                          <div className={styles.tableEmployeeName}>{m.nome}</div>
+                        </div>
+                      </td>
+                      <td>{m.cargoNome || "—"}</td>
+                      <td>{m.setorNome || "—"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        <div>
+          <div className={styles.panel}>
+            <div className={styles.panelHeader}>
+              <div className={styles.panelTitle}>Denúncias & alertas</div>
+              <Link className={styles.panelLink} href={`${base}/denuncias`}>
+                Ver todas
+              </Link>
+            </div>
+
+            {carregando && <p className={styles.panelHint}>Carregando alertas...</p>}
+            {!carregando && alertas.length === 0 && (
+              <p className={styles.panelHint}>Nenhum alerta no momento.</p>
+            )}
+
+            <div className={styles.alertList}>
+              {alertas.map((a) => {
+                const estado: Estado = a.origem === "DENUNCIA" ? "critico" : "atencao";
+                return (
+                  <div className={styles.alertItem} key={a.id}>
+                    <span
+                      className={styles.alertMarker}
+                      style={{ background: scoreColor(estado) }}
+                    />
+                    <div>
+                      <div className={styles.alertText}>
+                        {a.mensagem}
+                        {a.setorNome ? ` · ${a.setorNome}` : ""}
+                      </div>
+                      <div className={styles.alertMeta}>{tempoRelativo(a.criadoEm)}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className={styles.aiPanel}>
+            <div className={styles.panelHeader}>
+              <div>
+                <div className={styles.panelTitle}>Recomendações</div>
+                <div className={styles.panelHint}>
+                  Geradas a partir dos questionários, jornada e denúncias
+                </div>
+              </div>
+              <Link className={styles.panelLink} href={`${base}/recomendacoes`}>
+                Ver todas
+              </Link>
+            </div>
+
+            {carregando && <p className={styles.panelHint}>Carregando recomendações...</p>}
+            {!carregando && recomendacoes.length === 0 && (
+              <p className={styles.panelHint}>Nenhuma recomendação pendente.</p>
+            )}
+
+            <div className={styles.aiList}>
+              {recomendacoes.map((r) => (
+                <div className={styles.aiItem} key={`${r.setorNome}-${r.id}`}>
+                  <div className={styles.aiItemTitle}>
+                    {r.setorNome ? `${r.setorNome}` : "Recomendação"}
+                  </div>
+                  <div className={styles.aiItemBody}>{r.mensagem}</div>
+                  <span className={styles.aiItemTag}>
+                    {TIPO_LABEL[r.tipo] ?? r.tipo?.replace(/_/g, " ")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </>
+  );
+}
+
+/* ---------------- Página ---------------- */
+
+interface DashboardProps {
+  empresa?: unknown;
+}
+
+export default function Dashboard(_props: DashboardProps) {
+  const { tema, toggleTema } = useTheme();
+  const { token } = useAuth();
+  const { ehGestor, carregandoPermissoes } = useEmpresa();
+  const params = useParams();
+  const empresaId = params?.id as string;
+
+  // Badge de denúncias só faz sentido na visão de gestão; colaborador fica em 0
+  const [denunciasAbertas, setDenunciasAbertas] = useState(0);
+
+  useEffect(() => {
+    if (!ehGestor || !empresaId || !token) {
+      setDenunciasAbertas(0);
+      return;
+    }
+    let cancelado = false;
+    async function contar() {
+      try {
+        const res = await fetch(
+          `${API_URL}/api/painel/empresas/${empresaId}/dashboard/alertas?limite=20`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (!res.ok || cancelado) return;
+        const dados: AlertaApi[] = await res.json();
+        if (!cancelado) {
+          setDenunciasAbertas(
+            (Array.isArray(dados) ? dados : []).filter((a) => a.origem === "DENUNCIA").length
+          );
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    contar();
+    return () => {
+      cancelado = true;
+    };
+  }, [ehGestor, empresaId, token]);
+
   return (
     <div className={styles.page} data-theme={tema}>
       <Menu />
 
       <main className={styles.main}>
-        <Header
-          tema={tema}
-          toggleTema={toggleTema}
-          denunciasAbertas={denunciasAbertas}
-        />
+        <Header tema={tema} toggleTema={toggleTema} denunciasAbertas={denunciasAbertas} />
 
-        <section className={styles.kpiRow}>
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>Colaboradores ativos</div>
-            <div className={styles.kpiValue}>{totalColaboradores}</div>
-            <div className={`${styles.kpiDelta} ${styles.deltaGood}`}>+3 este mês</div>
-          </div>
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>Score médio de bem-estar</div>
-            <div className={styles.kpiValue}>{scoreMedio}</div>
-            <div className={`${styles.kpiDelta} ${styles.deltaWatch}`}>-4 pts vs. mês anterior</div>
-          </div>
-
-          <div className={`${styles.kpiCard} ${styles.kpiCardAction}`}>
-            <div className={styles.kpiLabel}>Convidar colaboradores</div>
-
-            {!codigoConvite ? (
-              <button
-                type="button"
-                className={styles.gerarCodigoButton}
-                onClick={gerarCodigoConvite}
-                disabled={gerandoCodigo}
-              >
-                <KeyRound size={16} />
-                {gerandoCodigo ? "Gerando..." : "Gerar código de convite"}
-              </button>
-            ) : (
-              <div className={styles.codigoGerado}>
-                <div className={styles.codigoValor}>
-                  {codigoConvite.codigo}
-                  <button
-                    type="button"
-                    className={styles.copiarBotao}
-                    onClick={copiarCodigo}
-                    title="Copiar código"
-                    aria-label="Copiar código"
-                  >
-                    {copiado ? <Check size={14} /> : <Copy size={14} />}
-                  </button>
-                </div>
-                <div className={styles.codigoExpira}>
-                  Expira em {formatarExpiracao(codigoConvite.expiraEm)}
-                </div>
-                <button
-                  type="button"
-                  className={styles.gerarNovoLink}
-                  onClick={gerarCodigoConvite}
-                  disabled={gerandoCodigo}
-                >
-                  {gerandoCodigo ? "Gerando..." : "Gerar novo código"}
-                </button>
-              </div>
-            )}
-
-            {erroCodigo && <div className={styles.codigoErro}>{erroCodigo}</div>}
-          </div>
-        </section>
-
-        <div className={styles.grid}>
-          <div>
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <div>
-                  <div className={styles.panelTitle}>Status geral dos setores</div>
-                  <div className={styles.panelHint}>A onda reflete a estabilidade do indicador de bem-estar no período</div>
-                </div>
-                <a className={styles.panelLink} href="#">Ver avaliação completa</a>
-              </div>
-
-              <div className={styles.sectorList}>
-                {setores.map((s) => (
-                  <div className={styles.sectorRow} key={s.nome}>
-                    <div>
-                      <span className={styles.sectorName}>{s.nome}</span>
-                      <span className={styles.sectorCount}>{s.colaboradores} pessoas</span>
-                    </div>
-                    <PulseLine pontos={s.pulso} estado={s.estado} />
-                    <div className={styles.sectorScore} style={{ color: scoreColor(s.estado) }}>
-                      {s.score}
-                    </div>
-                    <span className={`${styles.badge} ${badgeClass(s.estado)}`}>{estadoLabel[s.estado]}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <div className={styles.panelTitle}>Colaboradores</div>
-                <button className={styles.addButton}>Cadastrar colaborador</button>
-              </div>
-
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Nome</th>
-                    <th>Setor</th>
-                    <th>Jornada média</th>
-                    <th>Último questionário</th>
-                    <th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {colaboradores.map((c) => (
-                    <tr key={c.nome}>
-                      <td>
-                        <div className={styles.tableNameCell}>
-                          <div className={styles.miniAvatar}>
-                            {c.nome.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                          </div>
-                          <div>
-                            <div className={styles.tableEmployeeName}>{c.nome}</div>
-                            <div className={styles.tableEmployeeRole}>{c.cargo}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{c.setor}</td>
-                      <td>{c.jornadaMedia}</td>
-                      <td>{c.ultimoQuestionario}</td>
-                      <td>
-                        <span className={pillClass(c.estado)}>{estadoLabel[c.estado]}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div>
-            <div className={styles.panel}>
-              <div className={styles.panelHeader}>
-                <div className={styles.panelTitle}>Denúncias & alertas</div>
-                <a className={styles.panelLink} href="#">Ver todas</a>
-              </div>
-
-              <div className={styles.alertList}>
-                {alertas.map((a, i) => (
-                  <div className={styles.alertItem} key={i}>
-                    <span
-                      className={styles.alertMarker}
-                      style={{ background: scoreColor(a.estado) }}
-                    />
-                    <div>
-                      <div className={styles.alertText}>{a.texto}</div>
-                      <div className={styles.alertMeta}>{a.tempo}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.aiPanel}>
-              <div className={styles.panelHeader}>
-                <div>
-                  <div className={styles.panelTitle}>Recomendações da IA</div>
-                  <div className={styles.panelHint}>Geradas a partir dos questionários, jornada e denúncias</div>
-                </div>
-              </div>
-
-              <div className={styles.aiList}>
-                {recomendacoes.map((r, i) => (
-                  <div className={styles.aiItem} key={i}>
-                    <div className={styles.aiItemTitle}>{r.titulo}</div>
-                    <div className={styles.aiItemBody}>{r.corpo}</div>
-                    <span className={styles.aiItemTag}>{r.tag}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
+        {carregandoPermissoes ? (
+          <p className={styles.panelHint}>Preparando visão geral...</p>
+        ) : ehGestor ? (
+          <DashboardGestao empresaId={empresaId} token={token} />
+        ) : (
+          <DashboardColaborador empresaId={empresaId} token={token} />
+        )}
       </main>
     </div>
   );

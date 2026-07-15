@@ -91,9 +91,9 @@ export default function VerificarCodigoConteudo() {
 
       confirmarCodigo(data.token, {
         nome: data.nome,
-        email: data.email,
+        email: data.email ?? email ?? undefined,
         papel: data.papel,
-      });
+      }, data.dispositivoToken ?? data.dispositivo_token);
 
       router.push("/inicio");
     } catch {

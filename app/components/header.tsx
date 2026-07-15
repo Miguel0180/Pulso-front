@@ -65,8 +65,8 @@ export default function Header({ tema, toggleTema, denunciasAbertas, actions }: 
     <header className={styles.topbar}>
       <div className={styles.headerLogoBox}>
         <Image
-          src="/logo.png"
-          alt="Ético"
+          src={tema === "claro" ? "/logo-black.png" : "/logo.png"}
+          alt="Pulso Ético"
           fill
           sizes="160px"
           className={styles.headerLogo}

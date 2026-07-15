@@ -32,7 +32,7 @@ interface AuthContextType {
   carregando: boolean;
   login: (credenciais: Credenciais, manterConectado?: boolean) => Promise<ResultadoAuth>;
   cadastrar: (dados: CadastroDados) => Promise<ResultadoAuth>;
-  confirmarCodigo: (token: string, usuario: Usuario) => void;
+  confirmarCodigo: (token: string, usuario: Usuario, dispositivoToken?: string | null) => void;
   atualizarToken: (novoToken: string) => void;
   logout: () => Promise<void>;
 }
@@ -42,17 +42,35 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const CHAVE_TOKEN = "pulso_token";
 const CHAVE_USUARIO = "pulso_usuario";
 const CHAVE_MANTER = "pulso_manter_conectado";
+/** Token do dispositivo confiável (backend: ~90 dias). Não limpa no logout. */
+const CHAVE_DISPOSITIVO = "pulso_dispositivo_token";
 
 function lerStorage(chave: string) {
   if (typeof window === "undefined") return null;
   return window.localStorage.getItem(chave) ?? window.sessionStorage.getItem(chave);
 }
 
-function limparStorage() {
+function limparSessaoStorage() {
   window.localStorage.removeItem(CHAVE_TOKEN);
   window.localStorage.removeItem(CHAVE_USUARIO);
   window.sessionStorage.removeItem(CHAVE_TOKEN);
   window.sessionStorage.removeItem(CHAVE_USUARIO);
+}
+
+function lerDispositivoToken() {
+  if (typeof window === "undefined") return null;
+  return window.localStorage.getItem(CHAVE_DISPOSITIVO);
+}
+
+function salvarDispositivoToken(dispositivoToken?: string | null) {
+  if (!dispositivoToken || typeof window === "undefined") return;
+  window.localStorage.setItem(CHAVE_DISPOSITIVO, dispositivoToken);
+}
+
+function requerVerificacaoNoPayload(data: Record<string, unknown> | null) {
+  if (!data) return false;
+  const flag = data.requerVerificacao ?? data.requer_verificacao;
+  return flag === true || flag === "true";
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -89,10 +107,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function login({ email, senha }: Credenciais, manterConectado = false): Promise<ResultadoAuth> {
     try {
+      const dispositivoToken = lerDispositivoToken();
+
       const res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, senha }),
+        headers: {
+          "Content-Type": "application/json",
+          ...(dispositivoToken ? { "X-Dispositivo-Token": dispositivoToken } : {}),
+        },
+        body: JSON.stringify({
+          email,
+          senha,
+          ...(dispositivoToken ? { dispositivoToken } : {}),
+        }),
       });
 
       if (!res.ok) {
@@ -102,29 +129,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: false, erro: "Não foi possível entrar agora. Tente novamente em instantes." };
       }
 
-      let data: any = null;
+      let data: Record<string, unknown> | null = null;
       try {
         data = await res.json();
       } catch {
         data = null;
       }
 
-      const novoToken =
-        data?.token ?? data?.accessToken ?? data?.jwt ?? data?.access_token ?? null;
-
-      // Guarda a preferência mesmo se o token ainda não veio (precisa do código primeiro)
       window.localStorage.setItem(CHAVE_MANTER, manterConectado ? "1" : "0");
 
-      if (!novoToken) {
-        // API só confirmou o envio do código de verificação por e-mail
+      // Backend indica se precisa da tela de código (dispositivo novo / não confiável)
+      if (requerVerificacaoNoPayload(data)) {
         return { ok: true, precisaVerificacao: true };
       }
 
-      const novoUsuario: Usuario = { nome: data?.nome, email: data?.email, papel: data?.papel };
+      const novoToken =
+        (data?.token as string | undefined) ??
+        (data?.accessToken as string | undefined) ??
+        (data?.jwt as string | undefined) ??
+        (data?.access_token as string | undefined) ??
+        null;
+
+      if (!novoToken) {
+        // Sem token e sem flag explícita: trata como verificação necessária
+        return { ok: true, precisaVerificacao: true };
+      }
+
+      salvarDispositivoToken(
+        (data?.dispositivoToken as string | undefined) ??
+          (data?.dispositivo_token as string | undefined)
+      );
+
+      const novoUsuario: Usuario = {
+        nome: data?.nome as string | undefined,
+        email: (data?.email as string | undefined) ?? email,
+        papel: data?.papel as string | undefined,
+      };
       salvarSessao(novoToken, novoUsuario, manterConectado);
-      return { ok: true };
+      return { ok: true, precisaVerificacao: false };
     } catch {
-      return { ok: false, erro: "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente." };
+      return {
+        ok: false,
+        erro: "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.",
+      };
     }
   }
 
@@ -146,25 +193,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { ok: false, erro: "Não foi possível criar a conta agora. Tente novamente em instantes." };
       }
 
-      const data = await res.json();
-      const novoToken = data?.token ?? null;
-
-      if (!novoToken) {
-        return { ok: true, precisaVerificacao: true };
-      }
-
-      const novoUsuario: Usuario = { nome: data?.nome, email: data?.email, papel: data?.papel };
-      salvarSessao(novoToken, novoUsuario, true); // cadastro sempre mantém conectado, como já era antes
-
-      return { ok: true };
+      // Cadastro sempre exige verificação por e-mail
+      window.localStorage.setItem(CHAVE_MANTER, "1");
+      return { ok: true, precisaVerificacao: true };
     } catch {
-      return { ok: false, erro: "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente." };
+      return {
+        ok: false,
+        erro: "Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.",
+      };
     }
   }
 
-  // Usado pela tela de verificar-código, depois do POST /api/auth/verificar-codigo
-  function confirmarCodigo(novoToken: string, novoUsuario: Usuario) {
+  function confirmarCodigo(
+    novoToken: string,
+    novoUsuario: Usuario,
+    dispositivoToken?: string | null
+  ) {
     const manterConectado = window.localStorage.getItem(CHAVE_MANTER) === "1";
+    salvarDispositivoToken(dispositivoToken);
     salvarSessao(novoToken, novoUsuario, manterConectado);
   }
 
@@ -186,12 +232,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch {
-      // Mesmo se o backend falhar/estiver fora, seguimos limpando a sessão local
+      /* limpa sessão local mesmo se o backend falhar */
     } finally {
-      limparStorage();
+      limparSessaoStorage();
       window.localStorage.removeItem(CHAVE_MANTER);
       setToken(null);
       setUser(null);
+      // Mantém CHAVE_DISPOSITIVO — dispositivo continua confiável (~90 dias)
     }
   }
 

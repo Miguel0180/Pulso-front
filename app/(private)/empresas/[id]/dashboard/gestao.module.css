@@ -188,6 +188,67 @@
 }
 .addButton:hover { background: var(--accent-violet-dark); }
 
+/* ---------------------------------- Check-in humor ----------------------- */
+.humorPanel { margin-bottom: 20px; }
+.humorOpcoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+.humorBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.1s ease;
+}
+.humorBtn:hover:not(:disabled) {
+  border-color: var(--accent-violet);
+  transform: translateY(-1px);
+}
+.humorBtn:disabled { opacity: 0.55; cursor: not-allowed; }
+.humorBtnAtivo {
+  border-color: var(--accent-violet);
+  background: var(--accent-violet-soft);
+}
+.humorEmoji { font-size: 22px; line-height: 1; }
+.humorLabel { font-size: 12.5px; font-weight: 600; color: var(--ink-900); text-align: center; }
+.humorMsg { font-size: 13px; margin-top: 12px; }
+.humorMsgOk { color: var(--state-good); }
+.humorMsgErro { color: var(--state-critical); }
+
+.atalhosGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+.atalhoCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--surface-1);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.atalhoCard:hover {
+  border-color: var(--accent-violet);
+  box-shadow: 0 4px 14px rgba(109, 40, 217, 0.08);
+}
+.atalhoTitulo { font-size: 14px; font-weight: 600; color: var(--ink-900); }
+.atalhoDesc { font-size: 12.5px; color: var(--ink-500); line-height: 1.4; }
+
 /* ---------------------------------- IA recomendações ---------------------- */
 .aiPanel { background: linear-gradient(155deg, var(--inverse-bg-1) 0%, var(--inverse-bg-2) 100%); color: var(--inverse-text); border-radius: 16px; padding: 22px 24px; }
 .aiPanel .panelTitle { color: #ffffff; }
