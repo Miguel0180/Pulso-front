@@ -1,8 +1,12 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import styles from "./header.module.css";
 import ButtonTheme from "./button-theme";
+import { useAuth } from "../context/AuthContext";
+import { LogOut, ChevronDown } from "lucide-react";
 
 function BellIcon() {
   return (
@@ -17,13 +21,46 @@ interface HeaderProps {
   tema: "claro" | "escuro";
   toggleTema: () => void;
   denunciasAbertas: number;
-  // Slot opcional para ações extras (ex: botões específicos de uma página),
-  // renderizado à esquerda do grupo padrão (tema / notificações / usuário).
-  // Não é usado na página de gestão, então nada muda lá.
   actions?: React.ReactNode;
 }
 
+function iniciais(nome: string) {
+  return nome
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+}
+
 export default function Header({ tema, toggleTema, denunciasAbertas, actions }: HeaderProps) {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const [menuAberto, setMenuAberto] = useState(false);
+  const [saindo, setSaindo] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
+  const nome = user?.nome ?? "Usuário";
+
+  // Fecha o dropdown ao clicar fora dele
+  useEffect(() => {
+    function handleClickFora(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuAberto(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickFora);
+    return () => document.removeEventListener("mousedown", handleClickFora);
+  }, []);
+
+  async function handleSair() {
+    setSaindo(true);
+    await logout();
+    router.push("/login");
+  }
+
   return (
     <header className={styles.topbar}>
       <div className={styles.headerLogoBox}>
@@ -50,12 +87,33 @@ export default function Header({ tema, toggleTema, denunciasAbertas, actions }: 
 
         <div className={styles.actionDivider} />
 
-        <div className={styles.userChip}>
-          <div className={styles.avatar}>MM</div>
-          <div>
-            <div className={styles.userName}>Miguel Macedo</div>
-            <div className={styles.userRole}>Gerente</div>
-          </div>
+        <div className={styles.userMenu} ref={menuRef}>
+          <button
+            type="button"
+            className={styles.userChip}
+            onClick={() => setMenuAberto((v) => !v)}
+            aria-haspopup="menu"
+            aria-expanded={menuAberto}
+          >
+            <div className={styles.avatar}>{iniciais(nome)}</div>
+            <div className={styles.userName}>{nome}</div>
+            <ChevronDown size={14} className={styles.userChevron} />
+          </button>
+
+          {menuAberto && (
+            <div className={styles.userDropdown} role="menu">
+              <button
+                type="button"
+                className={styles.userDropdownItem}
+                onClick={handleSair}
+                disabled={saindo}
+                role="menuitem"
+              >
+                <LogOut size={15} />
+                {saindo ? "Saindo..." : "Sair"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./login.module.css";
-import { useTheme } from "../context/ThemeContext";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 
 function BrandMark() {
   return (
@@ -22,8 +24,41 @@ function BrandMark() {
 
 export default function LoginPage() {
   const { tema } = useTheme();
+  const { login } = useAuth();
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [manterConectado, setManterConectado] = useState(false);
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setErro(null);
+
+    if (!email || !senha) {
+      setErro("Preencha e-mail e senha.");
+      return;
+    }
+
+    setCarregando(true);
+
+    const resultado = await login({ email, senha }, manterConectado);
+
+    if (!resultado.ok) {
+      setErro(resultado.erro ?? "Não foi possível entrar agora.");
+      setCarregando(false);
+      return;
+    }
+
+    if (resultado.precisaVerificacao) {
+      router.push(`/verificar-codigo?email=${encodeURIComponent(email)}`);
+      return;
+    }
+
+    router.push("/inicio");
+  }
 
   return (
     <div className={styles.page} data-theme={tema}>
@@ -39,7 +74,7 @@ export default function LoginPage() {
             Acesse o painel de gestão de riscos psicossociais da sua empresa.
           </p>
 
-          <form className={styles.form}>
+          <form className={styles.form} onSubmit={handleSubmit}>
             <label className={styles.field}>
               <span className={styles.fieldLabel}>E-mail</span>
               <div className={styles.inputWrap}>
@@ -50,6 +85,8 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="voce@empresa.com"
                   className={styles.input}
+                  autoComplete="email"
+                  required
                 />
               </div>
             </label>
@@ -69,18 +106,35 @@ export default function LoginPage() {
                   onChange={(e) => setSenha(e.target.value)}
                   placeholder="••••••••"
                   className={styles.input}
+                  autoComplete="current-password"
+                  required
                 />
               </div>
             </label>
 
+            {erro && <p className={styles.errorText}>{erro}</p>}
+
             <label className={styles.checkboxRow}>
-              <input type="checkbox" className={styles.checkbox} />
+              <input
+                type="checkbox"
+                className={styles.checkbox}
+                checked={manterConectado}
+                onChange={(e) => setManterConectado(e.target.checked)}
+              />
               Manter conectado por 30 dias
             </label>
 
-            <Link href="/dashboard" className={styles.submitButton}>
-              Entrar <ArrowRight size={15} />
-            </Link>
+            <button type="submit" className={styles.submitButton} disabled={carregando}>
+              {carregando ? (
+                <>
+                  <Loader2 size={15} className={styles.spinner} /> Entrando...
+                </>
+              ) : (
+                <>
+                  Entrar <ArrowRight size={15} />
+                </>
+              )}
+            </button>
           </form>
         </div>
 

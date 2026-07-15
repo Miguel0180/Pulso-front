@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./inicio.module.css";
-import Header from "../components/header";
-import { useTheme } from "../context/ThemeContext";
+import Header from "../../components/header";
+import { useTheme } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
+import { API_URL } from "@/lib/api";
 
 interface Empresa {
   id: string;
   nome: string;
-  papel: "Admin" | "Membro";
-  colaboradores: number;
-  plano: string;
+  descricao?: string;
+  papel?: string;
 }
 
 function iniciais(nome: string) {
@@ -26,22 +28,57 @@ function iniciais(nome: string) {
 
 export default function Inicio() {
   const { tema, toggleTema } = useTheme();
+  const { token } = useAuth();
+  const router = useRouter();
 
-  const [empresas, setEmpresas] = useState<Empresa[]>([
-    { id: "e1", nome: "Grupo Vertente Comércio", papel: "Admin", colaboradores: 34, plano: "Plano Gestão" },
-    { id: "e2", nome: "Studio Alba Serviços", papel: "Membro", colaboradores: 12, plano: "Plano Essencial" },
-    { id: "e3", nome: "Nortis Alimentos", papel: "Membro", colaboradores: 58, plano: "Plano Gestão" },
-  ]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [carregandoEmpresas, setCarregandoEmpresas] = useState(true);
+  const [erroEmpresas, setErroEmpresas] = useState<string | null>(null);
 
   const [modalAberto, setModalAberto] = useState(false);
   const [codigo, setCodigo] = useState("");
   const [entrandoComCodigo, setEntrandoComCodigo] = useState(false);
   const [erroCodigo, setErroCodigo] = useState("");
 
+  useEffect(() => {
+    carregarEmpresas();
+  }, []);
+
+  async function carregarEmpresas() {
+    setCarregandoEmpresas(true);
+    setErroEmpresas(null);
+
+    try {
+      const res = await fetch(`${API_URL}/api/empresas/minhas`, {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          setErroEmpresas("Sua sessão expirou. Faça login novamente.");
+        } else {
+          setErroEmpresas("Não foi possível carregar suas empresas agora.");
+        }
+        setEmpresas([]);
+        return;
+      }
+
+      const data = await res.json();
+      const lista: Empresa[] = Array.isArray(data) ? data : data?.empresas ?? [];
+      setEmpresas(lista);
+    } catch {
+      setErroEmpresas("Não foi possível conectar ao servidor. Verifique sua internet.");
+      setEmpresas([]);
+    } finally {
+      setCarregandoEmpresas(false);
+    }
+  }
+
+  // Mantém letras e números, sem forçar maiúsculo/minúsculo, sem hífen
   function formatarCodigo(valor: string) {
-    const limpo = valor.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, 8);
-    if (limpo.length <= 4) return limpo;
-    return `${limpo.slice(0, 4)}-${limpo.slice(4)}`;
+    return valor.replace(/[^a-zA-Z0-9]/g, "").slice(0, 8);
   }
 
   function fecharModal() {
@@ -50,28 +87,47 @@ export default function Inicio() {
     setErroCodigo("");
   }
 
-  function handleEntrarComCodigo(e: React.FormEvent) {
+  async function handleEntrarComCodigo(e: React.FormEvent) {
     e.preventDefault();
-    const limpo = codigo.replace(/[^a-zA-Z0-9]/g, "");
-    if (limpo.length < 6) {
+    const limpo = codigo.trim();
+
+    if (limpo.length !== 8) {
       setErroCodigo("O código tem 8 caracteres. Confira e tente novamente.");
       return;
     }
 
     setErroCodigo("");
     setEntrandoComCodigo(true);
-    setTimeout(() => {
-      const nova: Empresa = {
-        id: `e${Date.now()}`,
-        nome: "Empresa via convite",
-        papel: "Membro",
-        colaboradores: 27,
-        plano: "Plano Gestão",
-      };
-      setEmpresas((prev) => [nova, ...prev]);
+
+    try {
+      const res = await fetch(`${API_URL}/api/empresas/entrar`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ codigo: limpo }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 404) {
+          setErroCodigo("Código inválido ou expirado.");
+        } else if (res.status === 401 || res.status === 403) {
+          setErroCodigo("Sua sessão expirou. Faça login novamente.");
+        } else {
+          setErroCodigo("Não foi possível entrar com esse código agora.");
+        }
+        setEntrandoComCodigo(false);
+        return;
+      }
+
+      await carregarEmpresas();
       setEntrandoComCodigo(false);
       fecharModal();
-    }, 600);
+    } catch {
+      setErroCodigo("Não foi possível conectar ao servidor.");
+      setEntrandoComCodigo(false);
+    }
   }
 
   return (
@@ -101,7 +157,20 @@ export default function Inicio() {
             </div>
           </div>
 
-          {empresas.length === 0 ? (
+          {carregandoEmpresas ? (
+            <div className={styles.empty}>
+              <div className={styles.emptyTitle}>Carregando suas empresas...</div>
+            </div>
+          ) : erroEmpresas ? (
+            <div className={styles.empty}>
+              <div className={styles.emptyTitle}>{erroEmpresas}</div>
+              <div className={styles.emptyBody}>
+                <button type="button" className={styles.codeButton} onClick={carregarEmpresas}>
+                  Tentar novamente
+                </button>
+              </div>
+            </div>
+          ) : empresas.length === 0 ? (
             <div className={styles.empty}>
               <div className={styles.emptyTitle}>Nenhuma empresa por aqui ainda</div>
               <div className={styles.emptyBody}>Crie uma empresa nova ou entre com um código de convite acima.</div>
@@ -112,20 +181,20 @@ export default function Inicio() {
                 <div className={styles.companyCard} key={emp.id}>
                   <div className={styles.companyCardTop}>
                     <div className={styles.companyAvatar}>{iniciais(emp.nome)}</div>
-                    <span className={emp.papel === "Admin" ? styles.rolePillAdmin : styles.rolePillMember}>
-                      {emp.papel}
-                    </span>
+                    {emp.papel && (
+                      <span className={emp.papel === "Admin" ? styles.rolePillAdmin : styles.rolePillMember}>
+                        {emp.papel}
+                      </span>
+                    )}
                   </div>
 
                   <div>
                     <div className={styles.companyName}>{emp.nome}</div>
-                    <div className={styles.companyMeta}>
-                      {emp.colaboradores} colaboradores · {emp.plano}
-                    </div>
+                    {emp.descricao && <div className={styles.companyMeta}>{emp.descricao}</div>}
                   </div>
 
                   <div className={styles.companyFooter}>
-                    <Link href="/gestao" className={styles.enterButton}>
+                    <Link href={`/empresas/${emp.id}/dashboard`} className={styles.enterButton}>
                       Entrar
                       <span aria-hidden="true">→</span>
                     </Link>
@@ -156,10 +225,10 @@ export default function Inicio() {
                 <input
                   className={`${styles.input} ${styles.codeInput}`}
                   type="text"
-                  placeholder="XXXX-XXXX"
+                  placeholder="Ex: AXOey8b2"
                   value={codigo}
                   onChange={(e) => setCodigo(formatarCodigo(e.target.value))}
-                  maxLength={9}
+                  maxLength={8}
                   autoFocus
                 />
               </label>

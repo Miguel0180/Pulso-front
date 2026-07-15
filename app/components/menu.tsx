@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useParams } from "next/navigation"; // ← adicionar useParams
 import {
   LayoutDashboard,
   Users,
@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import styles from "./menu.module.css";
 
-// Mapeamos os itens com seus respectivos caminhos (paths), ícone e label
 const navItems = [
   { label: "Visão geral", path: "/dashboard", icon: LayoutDashboard },
   { label: "Colaboradores", path: "/colaboradores", icon: Users },
@@ -32,17 +31,15 @@ const navItems = [
 const STORAGE_KEY = "etico:menu-recolhido";
 
 export default function Menu() {
-  const pathname = usePathname(); // Pega a URL atual do navegador
+  const pathname = usePathname();
+  const { id } = useParams(); // ← pega o id da empresa da URL atual
   const [recolhido, setRecolhido] = useState(false);
 
-  // Restaura a preferência do usuário (expandido/retraído) entre sessões
   useEffect(() => {
     const salvo = window.localStorage.getItem(STORAGE_KEY);
     if (salvo === "1") setRecolhido(true);
   }, []);
 
-  // Publica a largura atual do menu como variável CSS global, para que o
-  // grid das páginas (ex: 248px 1fr) acompanhe o expandir/retrair.
   useEffect(() => {
     document.documentElement.style.setProperty(
       "--sidebar-width",
@@ -74,13 +71,14 @@ export default function Menu() {
 
       <nav className={styles.nav}>
         {navItems.map((item) => {
-          const isActive = pathname === item.path;
+          const href = `/empresas/${id}${item.path}`; // ← monta o link com o id
+          const isActive = pathname === href;
           const Icon = item.icon;
 
           return (
             <Link
               key={item.label}
-              href={item.path}
+              href={href}
               className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
               title={recolhido ? item.label : undefined}
             >

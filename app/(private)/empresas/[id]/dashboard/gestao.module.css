@@ -44,6 +44,99 @@
 .deltaWatch { color: var(--state-watch); }
 .deltaCritical { color: var(--state-critical); }
 
+/* ---------------------------------- Convite / código -------------------- */
+.kpiCardAction {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+
+.gerarCodigoButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: none;
+  background: var(--accent-violet);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  align-self: flex-start;
+}
+.gerarCodigoButton:hover:not(:disabled) {
+  background: var(--accent-violet-dark);
+}
+.gerarCodigoButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.codigoGerado {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.codigoValor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ink-900);
+}
+
+.copiarBotao {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--ink-500);
+  display: flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+.copiarBotao:hover {
+  color: var(--accent-violet);
+}
+
+.codigoExpira {
+  font-size: 11.5px;
+  color: var(--ink-500);
+}
+
+.gerarNovoLink {
+  align-self: flex-start;
+  margin-top: 4px;
+  background: none;
+  border: none;
+  color: var(--accent-violet);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+.gerarNovoLink:hover:not(:disabled) {
+  color: var(--accent-violet-dark);
+}
+.gerarNovoLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.codigoErro {
+  font-size: 11.5px;
+  color: var(--state-critical);
+  margin-top: 2px;
+}
+
 /* ---------------------------------- Grid layout -------------------------- */
 .grid { display: grid; grid-template-columns: 1.65fr 1fr; gap: 20px; }
 .panel { background: var(--surface-1); border: 1px solid var(--line); border-radius: 16px; padding: 22px 24px; margin-bottom: 20px; }
@@ -109,12 +202,43 @@
 @media (max-width: 1080px) {
   .grid { grid-template-columns: 1fr; }
   .kpiRow { grid-template-columns: repeat(2, 1fr); }
+  .kpiCardAction { grid-column: span 2; }
 }
 
 @media (max-width: 720px) {
   .page { grid-template-columns: 1fr; }
   .main { padding: 24px 18px 40px; }
   .kpiRow { grid-template-columns: 1fr; }
+  .kpiCardAction { grid-column: span 1; }
   .sectorRow { grid-template-columns: 100px 1fr 60px; }
   .sectorScore { display: none; }
+}
+
+.empresaTitleRow {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 20px 0 4px;
+}
+
+.empresaTitle {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.empresaDescricao {
+  font-size: 13px;
+  color: var(--text-secondary, #6b6480);
+  margin: 0;
+}
+
+.empresaCargo {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6d28d9;
+  background: rgba(109, 40, 217, 0.1);
+  padding: 3px 8px;
+  border-radius: 8px;
 }

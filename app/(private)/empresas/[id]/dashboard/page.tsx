@@ -1,9 +1,14 @@
 "use client";
 
+import { useState } from "react";
+import { useParams } from "next/navigation";
 import styles from "./gestao.module.css";
-import Menu from "../components/menu";
-import Header from "../components/header";
-import { useTheme } from "../context/ThemeContext";
+import Menu from "../../../../components/menu";
+import Header from "../../../../components/header";
+import { useTheme } from "../../../../context/ThemeContext";
+import { useAuth } from "../../../../context/AuthContext";
+import { API_URL } from "@/lib/api";
+import { Copy, Check, KeyRound } from "lucide-react";
 
 type Estado = "bom" | "atencao" | "critico";
 
@@ -34,6 +39,13 @@ interface Recomendacao {
   titulo: string;
   corpo: string;
   tag: string;
+}
+
+interface CodigoConvite {
+  empresaId: number;
+  codigo: string;
+  geradoEm: string;
+  expiraEm: string;
 }
 
 const setores: Setor[] = [
@@ -125,13 +137,77 @@ function PulseLine({ pontos, estado }: { pontos: number[]; estado: Estado }) {
   );
 }
 
-export default function Dashboard() {
+interface DashboardProps {
+  empresa?: unknown;
+}
+
+export default function Dashboard(_props: DashboardProps) {
   const { tema, toggleTema } = useTheme();
+  const { token } = useAuth();
+  const params = useParams();
+  const empresaId = params?.id;
+
+  const [gerandoCodigo, setGerandoCodigo] = useState(false);
+  const [codigoConvite, setCodigoConvite] = useState<CodigoConvite | null>(null);
+  const [erroCodigo, setErroCodigo] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState(false);
 
   const totalColaboradores = setores.reduce((acc, s) => acc + s.colaboradores, 0);
   const scoreMedio = Math.round(setores.reduce((acc, s) => acc + s.score, 0) / setores.length);
-  const setoresCriticos = setores.filter((s) => s.estado === "critico").length;
   const denunciasAbertas = alertas.filter((a) => a.estado === "critico").length;
+
+  async function gerarCodigoConvite() {
+    if (!empresaId) return;
+
+    setGerandoCodigo(true);
+    setErroCodigo(null);
+    setCopiado(false);
+
+    try {
+      const res = await fetch(`${API_URL}/api/empresas/${empresaId}/codigo-convite`, {
+        method: "POST",
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!res.ok) {
+        setErroCodigo("Não foi possível gerar o código agora.");
+        return;
+      }
+
+      const data: CodigoConvite = await res.json();
+      setCodigoConvite(data);
+    } catch {
+      setErroCodigo("Não foi possível conectar ao servidor.");
+    } finally {
+      setGerandoCodigo(false);
+    }
+  }
+
+  async function copiarCodigo() {
+    if (!codigoConvite) return;
+    try {
+      await navigator.clipboard.writeText(codigoConvite.codigo);
+      setCopiado(true);
+      setTimeout(() => setCopiado(false), 2000);
+    } catch {
+      // clipboard indisponível, ignora silenciosamente
+    }
+  }
+
+  function formatarExpiracao(iso: string) {
+    try {
+      return new Date(iso).toLocaleString("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return iso;
+    }
+  }
 
   return (
     <div className={styles.page} data-theme={tema}>
@@ -155,15 +231,49 @@ export default function Dashboard() {
             <div className={styles.kpiValue}>{scoreMedio}</div>
             <div className={`${styles.kpiDelta} ${styles.deltaWatch}`}>-4 pts vs. mês anterior</div>
           </div>
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>Setores em estado crítico</div>
-            <div className={styles.kpiValue}>{setoresCriticos}</div>
-            <div className={`${styles.kpiDelta} ${styles.deltaCritical}`}>Atendimento requer ação</div>
-          </div>
-          <div className={styles.kpiCard}>
-            <div className={styles.kpiLabel}>Denúncias abertas</div>
-            <div className={styles.kpiValue}>2</div>
-            <div className={`${styles.kpiDelta} ${styles.deltaWatch}`}>1 sem resposta há 48h</div>
+
+          <div className={`${styles.kpiCard} ${styles.kpiCardAction}`}>
+            <div className={styles.kpiLabel}>Convidar colaboradores</div>
+
+            {!codigoConvite ? (
+              <button
+                type="button"
+                className={styles.gerarCodigoButton}
+                onClick={gerarCodigoConvite}
+                disabled={gerandoCodigo}
+              >
+                <KeyRound size={16} />
+                {gerandoCodigo ? "Gerando..." : "Gerar código de convite"}
+              </button>
+            ) : (
+              <div className={styles.codigoGerado}>
+                <div className={styles.codigoValor}>
+                  {codigoConvite.codigo}
+                  <button
+                    type="button"
+                    className={styles.copiarBotao}
+                    onClick={copiarCodigo}
+                    title="Copiar código"
+                    aria-label="Copiar código"
+                  >
+                    {copiado ? <Check size={14} /> : <Copy size={14} />}
+                  </button>
+                </div>
+                <div className={styles.codigoExpira}>
+                  Expira em {formatarExpiracao(codigoConvite.expiraEm)}
+                </div>
+                <button
+                  type="button"
+                  className={styles.gerarNovoLink}
+                  onClick={gerarCodigoConvite}
+                  disabled={gerandoCodigo}
+                >
+                  {gerandoCodigo ? "Gerando..." : "Gerar novo código"}
+                </button>
+              </div>
+            )}
+
+            {erroCodigo && <div className={styles.codigoErro}>{erroCodigo}</div>}
           </div>
         </section>
 

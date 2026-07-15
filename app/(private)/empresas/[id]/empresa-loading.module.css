@@ -1,0 +1,23 @@
+/* app/empresas/[id]/empresa-loading.module.css */
+.estado {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: var(--text-secondary, #6b6480);
+}
+
+.spinner {
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+.erro {
+  color: #dc2626;
+  font-size: 14px;
+}

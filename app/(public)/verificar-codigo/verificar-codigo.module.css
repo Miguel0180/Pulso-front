@@ -1,0 +1,119 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0e0e13;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 400px;
+  background: #16161d;
+  border: 1px solid #24242e;
+  border-radius: 16px;
+  padding: 40px 32px;
+  text-align: center;
+}
+
+.logo {
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #f3f3f5;
+  margin-bottom: 24px;
+}
+.logo span {
+  color: #7c5cff;
+}
+
+.titulo {
+  font-size: 20px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.subtitulo {
+  font-size: 13px;
+  color: #9a9aa5;
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+.subtitulo strong {
+  color: #d8d8e0;
+}
+
+.codigoRow {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.digitoInput {
+  width: 44px;
+  height: 52px;
+  text-align: center;
+  font-size: 22px;
+  border-radius: 10px;
+  border: 1px solid #2c2c38;
+  background: #1c1c24;
+  color: #fff;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.digitoInput:focus {
+  border-color: #7c5cff;
+}
+.digitoErro {
+  border-color: #e5484d;
+}
+
+.mensagemErro {
+  color: #e5484d;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.botaoPrimario {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #7c5cff;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.botaoPrimario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: girar 0.8s linear infinite;
+}
+@keyframes girar {
+  to { transform: rotate(360deg); }
+}
+
+.botaoLink {
+  margin-top: 16px;
+  background: none;
+  border: none;
+  color: #9a9aa5;
+  font-size: 13px;
+  cursor: pointer;
+}
+.botaoLink:hover {
+  color: #d8d8e0;
+}
+.botaoLink:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

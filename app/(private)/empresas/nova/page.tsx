@@ -4,30 +4,56 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "./nova-empresa.module.css";
-import { useTheme } from "../../context/ThemeContext";
-
-const SEGMENTOS = ["Comércio", "Serviços", "Indústria", "Tecnologia", "Saúde", "Educação", "Outro"];
-const TAMANHOS = ["1 a 10 pessoas", "11 a 50 pessoas", "51 a 200 pessoas", "Mais de 200 pessoas"];
+import { useTheme } from "../../../context/ThemeContext";
+import { useAuth } from "../../../context/AuthContext";
+import { API_URL } from "@/lib/api";
 
 export default function NovaEmpresa() {
   const { tema } = useTheme();
+  const { token } = useAuth();
   const router = useRouter();
 
   const [nomeEmpresa, setNomeEmpresa] = useState("");
-  const [segmento, setSegmento] = useState(SEGMENTOS[0]);
-  const [tamanho, setTamanho] = useState(TAMANHOS[0]);
-  const [cnpj, setCnpj] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [criando, setCriando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setErro(null);
+
     if (!nomeEmpresa.trim()) return;
 
     setCriando(true);
-    setTimeout(() => {
-      // Aqui entraria a chamada real para criar a empresa (API / backend).
+
+    try {
+      const res = await fetch(`${API_URL}/api/empresas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          nome: nomeEmpresa,
+          descricao,
+        }),
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          setErro("Sua sessão expirou. Faça login novamente.");
+        } else {
+          setErro("Não foi possível criar a empresa agora. Tente novamente.");
+        }
+        setCriando(false);
+        return;
+      }
+
       router.push("/inicio");
-    }, 700);
+    } catch {
+      setErro("Não foi possível conectar ao servidor. Verifique sua internet e tente novamente.");
+      setCriando(false);
+    }
   }
 
   return (
@@ -61,39 +87,17 @@ export default function NovaEmpresa() {
             </label>
 
             <label className={styles.field}>
-              <span className={styles.fieldLabel}>CNPJ (opcional)</span>
-              <input
-                className={`${styles.input} ${styles.mono}`}
-                type="text"
-                placeholder="00.000.000/0000-00"
-                value={cnpj}
-                onChange={(e) => setCnpj(e.target.value)}
+              <span className={styles.fieldLabel}>Descrição</span>
+              <textarea
+                className={styles.input}
+                placeholder="Conte um pouco sobre a empresa, ramo de atuação, etc."
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                rows={4}
               />
             </label>
 
-            <div className={styles.fieldRow}>
-              <label className={styles.field}>
-                <span className={styles.fieldLabel}>Segmento</span>
-                <select className={styles.select} value={segmento} onChange={(e) => setSegmento(e.target.value)}>
-                  {SEGMENTOS.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              <label className={styles.field}>
-                <span className={styles.fieldLabel}>Tamanho da equipe</span>
-                <select className={styles.select} value={tamanho} onChange={(e) => setTamanho(e.target.value)}>
-                  {TAMANHOS.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
+            {erro && <p className={styles.errorText}>{erro}</p>}
 
             <div className={styles.actions}>
               <Link href="/inicio" className={styles.cancelButton}>

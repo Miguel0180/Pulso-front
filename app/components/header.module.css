@@ -75,3 +75,62 @@
   .topbar { flex-wrap: wrap; gap: 16px; }
   .userName, .userRole { display: none; }
 }
+
+.userMenu {
+  position: relative;
+}
+
+.userChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 8px;
+  color: inherit;
+  font: inherit;
+}
+.userChip:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.userChevron {
+  opacity: 0.6;
+}
+
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #1c1c24;
+  border: 1px solid #2c2c38;
+  border-radius: 10px;
+  min-width: 140px;
+  padding: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 50;
+}
+
+.userDropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: #e5484d;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+.userDropdownItem:hover {
+  background: rgba(229, 72, 77, 0.1);
+}
+.userDropdownItem:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
