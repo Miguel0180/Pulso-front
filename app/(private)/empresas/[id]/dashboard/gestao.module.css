@@ -259,6 +259,15 @@
 .aiItemBody { font-size: 12px; color: var(--inverse-text-dim); line-height: 1.5; }
 .aiItemTag { display: inline-block; margin-top: 8px; font-size: 10.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--accent-violet-medium); }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
 /* ---------------------------------- Responsive ---------------------------- */
 @media (max-width: 1080px) {
   .grid { grid-template-columns: 1fr; }
@@ -268,11 +277,15 @@
 
 @media (max-width: 720px) {
   .page { grid-template-columns: 1fr; }
-  .main { padding: 24px 18px 40px; }
+  .main { padding: 72px 16px 40px; }
   .kpiRow { grid-template-columns: 1fr; }
   .kpiCardAction { grid-column: span 1; }
-  .sectorRow { grid-template-columns: 100px 1fr 60px; }
+  .sectorRow { grid-template-columns: 1fr 48px; gap: 10px; }
   .sectorScore { display: none; }
+  .atalhosGrid { grid-template-columns: 1fr; }
+  .humorOpcoes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sectionHeader { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .empresaTitle { font-size: 18px; }
 }
 
 .empresaTitleRow {

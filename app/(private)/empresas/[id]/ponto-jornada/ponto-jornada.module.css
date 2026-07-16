@@ -64,6 +64,56 @@
   .statusDia {
     grid-template-columns: 1fr;
   }
+
+  .abrirCameraBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cameraBox {
+    max-width: 100%;
+  }
+
+  .cameraActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .cameraActions > button {
+    flex: 1 1 140px;
+    justify-content: center;
+  }
+
+  .diaHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dateInput {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+
+  .kpiRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 420px) {
+  .kpiRow {
+    grid-template-columns: 1fr;
+  }
+
+  .statusValue {
+    font-size: 16px;
+  }
 }
 
 .abrirCameraBtn {
@@ -286,10 +336,4 @@
   color: var(--ink-500);
   font-size: 13px;
   padding: 16px 0;
-}
-
-@media (max-width: 640px) {
-  .kpiRow {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
