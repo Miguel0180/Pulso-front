@@ -11,6 +11,61 @@
   margin-bottom: 16px;
 }
 
+.statusDia {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.statusItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+}
+
+.statusItemDestaque {
+  border-color: color-mix(in srgb, var(--accent-violet, #6d28d9) 35%, var(--line));
+  background: color-mix(in srgb, var(--accent-violet, #6d28d9) 8%, var(--surface-2));
+}
+
+.statusIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.04);
+  color: var(--ink-700);
+  flex-shrink: 0;
+}
+
+.statusLabel {
+  font-size: 11px;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 4px;
+}
+
+.statusValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 720px) {
+  .statusDia {
+    grid-template-columns: 1fr;
+  }
+}
+
 .abrirCameraBtn {
   display: inline-flex;
   align-items: center;

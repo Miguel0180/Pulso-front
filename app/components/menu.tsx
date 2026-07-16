@@ -14,10 +14,15 @@ import {
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
+  Home,
   type LucideIcon,
 } from "lucide-react";
 import styles from "./menu.module.css";
 import { useEmpresa, type Permissao } from "../context/EmpresaContext";
+import {
+  formatarHoraPonto,
+  usePontoHoje,
+} from "@/lib/ponto-hoje";
 
 interface NavItem {
   label: string;
@@ -81,8 +86,14 @@ const STORAGE_KEY = "etico:menu-recolhido";
 export default function Menu() {
   const pathname = usePathname();
   const { id } = useParams();
+  const empresaId = typeof id === "string" ? id : Array.isArray(id) ? id[0] : undefined;
   const { temPermissao, carregandoPermissoes, empresa } = useEmpresa();
   const [recolhido, setRecolhido] = useState(false);
+
+  const podeVerPonto = temPermissao("GERENCIAR_JORNADAS", "REGISTRAR_PONTO");
+  const { ponto, totalFormatado, emAndamento } = usePontoHoje(
+    podeVerPonto ? empresaId : undefined
+  );
 
   useEffect(() => {
     const salvo = window.localStorage.getItem(STORAGE_KEY);
@@ -122,6 +133,16 @@ export default function Menu() {
         >
           {recolhido ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
         </button>
+
+        <Link
+          href="/inicio"
+          className={styles.homeButton}
+          title="Voltar para início"
+          aria-label="Voltar para página de início"
+        >
+          <Home size={17} />
+          <span className={styles.homeLabel}>Início</span>
+        </Link>
       </div>
 
       <nav className={styles.nav}>
@@ -143,6 +164,29 @@ export default function Menu() {
           );
         })}
       </nav>
+
+      {podeVerPonto && (
+        <div className={styles.pontoResumo} title={recolhido ? `Hoje: ${totalFormatado}` : undefined}>
+          <div className={styles.pontoResumoTitulo}>
+            <Clock size={14} />
+            <span className={styles.pontoResumoTituloText}>Hoje</span>
+          </div>
+          <div className={styles.pontoResumoLinhas}>
+            <div className={styles.pontoResumoLinha}>
+              <span>Entrada</span>
+              <strong>{formatarHoraPonto(ponto?.entrada ?? null)}</strong>
+            </div>
+            <div className={styles.pontoResumoLinha}>
+              <span>Saída</span>
+              <strong>{formatarHoraPonto(ponto?.saida ?? null)}</strong>
+            </div>
+            <div className={`${styles.pontoResumoLinha} ${styles.pontoResumoTotal}`}>
+              <span>{emAndamento ? "Em andamento" : "Total"}</span>
+              <strong>{totalFormatado}</strong>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={styles.navFooter}>
         <span className={styles.navFooterText}>

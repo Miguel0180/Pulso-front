@@ -7,7 +7,11 @@ import Header from "../../../../components/header";
 import { useTheme } from "../../../../context/ThemeContext";
 import { useAuth } from "../../../../context/AuthContext";
 import { API_URL } from "@/lib/api";
-import { Camera, X, Check, RefreshCw } from "lucide-react";
+import {
+  formatarHoraPonto,
+  usePontoHoje,
+} from "@/lib/ponto-hoje";
+import { Camera, X, Check, RefreshCw, LogIn, LogOut, Timer } from "lucide-react";
 
 import pageStyles from "../dashboard/gestao.module.css";
 import styles from "./ponto-jornada.module.css";
@@ -44,12 +48,7 @@ function hojeISO() {
 }
 
 function formatarHora(iso: string | null) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
-  } catch {
-    return iso;
-  }
+  return formatarHoraPonto(iso);
 }
 
 function statusClasse(status: string) {
@@ -65,6 +64,13 @@ function BaterPontoWidget({ empresaId, token }: { empresaId: string; token: stri
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const {
+    ponto,
+    totalFormatado,
+    proximaBatida,
+    emAndamento,
+    registrarBatida,
+  } = usePontoHoje(empresaId);
 
   const [cameraAberta, setCameraAberta] = useState(false);
   const [fotoCapturada, setFotoCapturada] = useState<string | null>(null);
@@ -154,22 +160,26 @@ function BaterPontoWidget({ empresaId, token }: { empresaId: string; token: stri
       // Se vier algo utilizável, mostramos uma mensagem mais específica;
       // caso contrário, caímos numa mensagem genérica de sucesso.
       let mensagemSucesso = "Ponto registrado com sucesso!";
+      let tipoApi: string | null = null;
+      let horarioIso: string | null = null;
       try {
         const corpo = await res.text();
         if (corpo) {
           const dados: RespostaPonto = JSON.parse(corpo);
-          const tipo = dados.tipo ? String(dados.tipo) : null;
-          const horario = dados.horario ? formatarHora(String(dados.horario)) : null;
-          if (tipo && horario) {
-            mensagemSucesso = `${tipo} registrada às ${horario}.`;
-          } else if (horario) {
-            mensagemSucesso = `Ponto registrado às ${horario}.`;
+          tipoApi = dados.tipo ? String(dados.tipo) : null;
+          horarioIso = dados.horario ? String(dados.horario) : null;
+          const horarioFmt = horarioIso ? formatarHora(horarioIso) : null;
+          if (tipoApi && horarioFmt) {
+            mensagemSucesso = `${tipoApi} registrada às ${horarioFmt}.`;
+          } else if (horarioFmt) {
+            mensagemSucesso = `Ponto registrado às ${horarioFmt}.`;
           }
         }
       } catch {
         /* corpo vazio ou não-JSON, mantém mensagem genérica */
       }
 
+      registrarBatida({ tipo: tipoApi, horario: horarioIso });
       setSucesso(mensagemSucesso);
       setCameraAberta(false);
       setFotoCapturada(null);
@@ -194,10 +204,44 @@ function BaterPontoWidget({ empresaId, token }: { empresaId: string; token: stri
         </div>
       </div>
 
+      <div className={styles.statusDia}>
+        <div className={styles.statusItem}>
+          <div className={styles.statusIcon} aria-hidden>
+            <LogIn size={16} />
+          </div>
+          <div>
+            <div className={styles.statusLabel}>Entrada</div>
+            <div className={styles.statusValue}>{formatarHora(ponto?.entrada ?? null)}</div>
+          </div>
+        </div>
+        <div className={styles.statusItem}>
+          <div className={styles.statusIcon} aria-hidden>
+            <LogOut size={16} />
+          </div>
+          <div>
+            <div className={styles.statusLabel}>Saída</div>
+            <div className={styles.statusValue}>{formatarHora(ponto?.saida ?? null)}</div>
+          </div>
+        </div>
+        <div className={`${styles.statusItem} ${styles.statusItemDestaque}`}>
+          <div className={styles.statusIcon} aria-hidden>
+            <Timer size={16} />
+          </div>
+          <div>
+            <div className={styles.statusLabel}>
+              {emAndamento ? "Horas hoje (em andamento)" : "Total de horas hoje"}
+            </div>
+            <div className={styles.statusValue}>{totalFormatado}</div>
+          </div>
+        </div>
+      </div>
+
       {!cameraAberta && !fotoCapturada && (
         <button type="button" className={styles.abrirCameraBtn} onClick={abrirCamera}>
           <Camera size={18} />
-          Abrir câmera e bater ponto
+          {proximaBatida === "entrada"
+            ? "Abrir câmera e registrar entrada"
+            : "Abrir câmera e registrar saída"}
         </button>
       )}
 

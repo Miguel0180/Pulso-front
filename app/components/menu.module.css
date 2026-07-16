@@ -22,9 +22,12 @@
 /* ---------------------------------- Botão expandir/retrair ---------------- */
 .toggleRow {
   display: flex;
-  justify-content: flex-start;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 .sidebarCollapsed .toggleRow {
+  flex-direction: column;
   justify-content: center;
 }
 
@@ -45,6 +48,42 @@
 .toggleButton:hover {
   background: rgba(255, 255, 255, 0.1);
   color: var(--inverse-text);
+}
+
+.homeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--inverse-text-dim);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.homeButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--inverse-text);
+}
+.homeLabel {
+  max-width: 80px;
+  opacity: 1;
+  overflow: hidden;
+  transition: opacity 0.15s ease, max-width 0.2s ease;
+}
+.sidebarCollapsed .homeButton {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+}
+.sidebarCollapsed .homeLabel {
+  opacity: 0;
+  max-width: 0;
 }
 
 /* ---------------------------------- Navegação ----------------------------- */
@@ -86,6 +125,84 @@
 }
 
 .navItemActive { background: var(--accent-violet); color: #ffffff; }
+
+/* ---------------------------------- Resumo do ponto ----------------------- */
+.pontoResumo {
+  margin-top: 4px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.pontoResumoTitulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--inverse-text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.pontoResumoTituloText {
+  opacity: 1;
+  max-width: 120px;
+  overflow: hidden;
+  transition: opacity 0.15s ease, max-width 0.2s ease;
+}
+
+.pontoResumoLinhas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pontoResumoLinha {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--inverse-text-dim);
+}
+
+.pontoResumoLinha strong {
+  color: var(--inverse-text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.pontoResumoTotal {
+  padding-top: 6px;
+  margin-top: 2px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebarCollapsed .pontoResumo {
+  padding: 10px 0;
+  text-align: center;
+  border: none;
+  background: transparent;
+}
+
+.sidebarCollapsed .pontoResumoTitulo {
+  justify-content: center;
+  margin-bottom: 0;
+}
+
+.sidebarCollapsed .pontoResumoTituloText,
+.sidebarCollapsed .pontoResumoLinhas {
+  opacity: 0;
+  max-height: 0;
+  max-width: 0;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
 
 /* ---------------------------------- Rodapé --------------------------------- */
 .navFooter {
