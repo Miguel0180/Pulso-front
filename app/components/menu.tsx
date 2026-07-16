@@ -47,7 +47,7 @@ const navItems: NavItem[] = [
   },
   {
     label: "Questionários",
-    path: "/questionarios",
+    path: "/questionarios", 
     icon: ClipboardList,
     permissoes: ["GERENCIAR_PESQUISAS", "RESPONDER_PESQUISAS"],
   },
