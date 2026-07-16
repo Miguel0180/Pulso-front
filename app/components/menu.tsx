@@ -21,16 +21,15 @@ import {
 } from "lucide-react";
 import styles from "./menu.module.css";
 import { useEmpresa, type Permissao } from "../context/EmpresaContext";
-import {
-  formatarHoraPonto,
-  usePontoHoje,
-} from "@/lib/ponto-hoje";
+import { formatarHoraPonto, usePontoHoje } from "@/lib/ponto-hoje";
 
 interface NavItem {
   label: string;
   path: string;
+  pathColaborador?: string;
   icon: LucideIcon;
-  /** Se omitido, item sempre aparece (ex.: Configurações). */
+
+  /** Se omitido, o item sempre aparece. */
   permissoes?: Permissao[];
 }
 
@@ -61,8 +60,8 @@ const navItems: NavItem[] = [
   {
     label: "Denúncias",
     path: "/denuncias",
+    pathColaborador: "/denuncias/nova",
     icon: AlertTriangle,
-    permissoes: ["GERENCIAR_DENUNCIAS", "RESPONDER_DENUNCIAS"],
   },
   {
     label: "Avaliação de Risco",
@@ -89,29 +88,58 @@ const MOBILE_MQ = "(max-width: 720px)";
 export default function Menu() {
   const pathname = usePathname();
   const { id } = useParams();
-  const empresaId = typeof id === "string" ? id : Array.isArray(id) ? id[0] : undefined;
+
+  const empresaId =
+    typeof id === "string"
+      ? id
+      : Array.isArray(id)
+        ? id[0]
+        : undefined;
+
   const { temPermissao, carregandoPermissoes, empresa } = useEmpresa();
+
   const [recolhido, setRecolhido] = useState(false);
   const [mobileAberto, setMobileAberto] = useState(false);
   const [ehMobile, setEhMobile] = useState(false);
 
-  const podeVerPonto = temPermissao("GERENCIAR_JORNADAS", "REGISTRAR_PONTO");
+  const podeVerPonto = temPermissao(
+    "GERENCIAR_JORNADAS",
+    "REGISTRAR_PONTO"
+  );
+
+  const podeAcessarPainelDenuncias = temPermissao(
+    "GERENCIAR_DENUNCIAS",
+    "RESPONDER_DENUNCIAS"
+  );
+
   const { ponto, totalFormatado, emAndamento } = usePontoHoje(
     podeVerPonto ? empresaId : undefined
   );
 
   useEffect(() => {
     const salvo = window.localStorage.getItem(STORAGE_KEY);
-    if (salvo === "1") setRecolhido(true);
+
+    if (salvo === "1") {
+      setRecolhido(true);
+    }
 
     const mq = window.matchMedia(MOBILE_MQ);
-    const sync = () => {
+
+    const sincronizarMobile = () => {
       setEhMobile(mq.matches);
-      if (mq.matches) setMobileAberto(false);
+
+      if (mq.matches) {
+        setMobileAberto(false);
+      }
     };
-    sync();
-    mq.addEventListener("change", sync);
-    return () => mq.removeEventListener("change", sync);
+
+    sincronizarMobile();
+
+    mq.addEventListener("change", sincronizarMobile);
+
+    return () => {
+      mq.removeEventListener("change", sincronizarMobile);
+    };
   }, []);
 
   useEffect(() => {
@@ -121,36 +149,54 @@ export default function Menu() {
     );
   }, [recolhido, ehMobile]);
 
-  // Fecha o drawer ao navegar (mobile).
   useEffect(() => {
     setMobileAberto(false);
   }, [pathname]);
 
   useEffect(() => {
-    if (!mobileAberto) return;
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setMobileAberto(false);
+    if (!mobileAberto) {
+      return;
     }
-    document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
+
+    function fecharComEscape(evento: KeyboardEvent) {
+      if (evento.key === "Escape") {
+        setMobileAberto(false);
+      }
+    }
+
+    document.addEventListener("keydown", fecharComEscape);
+
+    const overflowAnterior = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.removeEventListener("keydown", fecharComEscape);
+      document.body.style.overflow = overflowAnterior;
     };
   }, [mobileAberto]);
 
-  function alternar() {
-    setRecolhido((prev) => {
-      const novo = !prev;
-      window.localStorage.setItem(STORAGE_KEY, novo ? "1" : "0");
-      return novo;
+  function alternarMenu() {
+    setRecolhido((valorAnterior) => {
+      const novoValor = !valorAnterior;
+
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        novoValor ? "1" : "0"
+      );
+
+      return novoValor;
     });
   }
 
   const itensVisiveis = navItems.filter((item) => {
-    if (!item.permissoes || item.permissoes.length === 0) return true;
-    if (carregandoPermissoes && !empresa) return false;
+    if (!item.permissoes || item.permissoes.length === 0) {
+      return true;
+    }
+
+    if (carregandoPermissoes && !empresa) {
+      return false;
+    }
+
     return temPermissao(...item.permissoes);
   });
 
@@ -190,11 +236,23 @@ export default function Menu() {
           <button
             type="button"
             className={`${styles.toggleButton} ${styles.toggleDesktop}`}
-            onClick={alternar}
-            aria-label={recolhidoEfetivo ? "Expandir menu" : "Retrair menu"}
-            title={recolhidoEfetivo ? "Expandir menu" : "Retrair menu"}
+            onClick={alternarMenu}
+            aria-label={
+              recolhidoEfetivo
+                ? "Expandir menu"
+                : "Retrair menu"
+            }
+            title={
+              recolhidoEfetivo
+                ? "Expandir menu"
+                : "Retrair menu"
+            }
           >
-            {recolhidoEfetivo ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
+            {recolhidoEfetivo ? (
+              <PanelLeftOpen size={17} />
+            ) : (
+              <PanelLeftClose size={17} />
+            )}
           </button>
 
           <button
@@ -219,20 +277,45 @@ export default function Menu() {
 
         <nav className={styles.nav}>
           {itensVisiveis.map((item) => {
-            const href = `/empresas/${id}${item.path}`;
-            const isActive = pathname === href || pathname?.startsWith(`${href}/`);
+            const pathDestino =
+              item.pathColaborador &&
+              !podeAcessarPainelDenuncias
+                ? item.pathColaborador
+                : item.path;
+
+            const href = `/empresas/${empresaId}${pathDestino}`;
+
+            const activeBase =
+              `/empresas/${empresaId}${item.path}`;
+
+            const isActive =
+              pathname === activeBase ||
+              pathname?.startsWith(`${activeBase}/`);
+
             const Icon = item.icon;
 
             return (
               <Link
                 key={item.path}
                 href={href}
-                className={`${styles.navItem} ${isActive ? styles.navItemActive : ""}`}
-                title={recolhidoEfetivo ? item.label : undefined}
+                className={`${styles.navItem} ${
+                  isActive ? styles.navItemActive : ""
+                }`}
+                title={
+                  recolhidoEfetivo
+                    ? item.label
+                    : undefined
+                }
                 onClick={() => setMobileAberto(false)}
               >
-                <Icon size={17} className={styles.navIcon} />
-                <span className={styles.navLabel}>{item.label}</span>
+                <Icon
+                  size={17}
+                  className={styles.navIcon}
+                />
+
+                <span className={styles.navLabel}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
@@ -241,23 +324,50 @@ export default function Menu() {
         {podeVerPonto && (
           <div
             className={styles.pontoResumo}
-            title={recolhidoEfetivo ? `Hoje: ${totalFormatado}` : undefined}
+            title={
+              recolhidoEfetivo
+                ? `Hoje: ${totalFormatado}`
+                : undefined
+            }
           >
             <div className={styles.pontoResumoTitulo}>
               <Clock size={14} />
-              <span className={styles.pontoResumoTituloText}>Hoje</span>
+
+              <span className={styles.pontoResumoTituloText}>
+                Hoje
+              </span>
             </div>
+
             <div className={styles.pontoResumoLinhas}>
               <div className={styles.pontoResumoLinha}>
                 <span>Entrada</span>
-                <strong>{formatarHoraPonto(ponto?.entrada ?? null)}</strong>
+
+                <strong>
+                  {formatarHoraPonto(
+                    ponto?.entrada ?? null
+                  )}
+                </strong>
               </div>
+
               <div className={styles.pontoResumoLinha}>
                 <span>Saída</span>
-                <strong>{formatarHoraPonto(ponto?.saida ?? null)}</strong>
+
+                <strong>
+                  {formatarHoraPonto(
+                    ponto?.saida ?? null
+                  )}
+                </strong>
               </div>
-              <div className={`${styles.pontoResumoLinha} ${styles.pontoResumoTotal}`}>
-                <span>{emAndamento ? "Em andamento" : "Total"}</span>
+
+              <div
+                className={`${styles.pontoResumoLinha} ${styles.pontoResumoTotal}`}
+              >
+                <span>
+                  {emAndamento
+                    ? "Em andamento"
+                    : "Total"}
+                </span>
+
                 <strong>{totalFormatado}</strong>
               </div>
             </div>

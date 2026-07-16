@@ -82,7 +82,11 @@ export default function NovaDenunciaPage() {
       <Sidebar />
 
       <main className={pageStyles.main}>
-        <Header tema={tema} toggleTema={toggleTema} />
+        <Header
+  tema={tema}
+  toggleTema={toggleTema}
+  denunciasAbertas={0}
+/>
 
         <div className={pageStyles.sectionHeader}>
           <div>
