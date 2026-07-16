@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
     permissoes: ["GERENCIAR_EMPRESA", "GERENCIAR_MEMBROS"],
   },
   {
-    label: "Recomendações",
+    label: "Recomendações de Ia",
     path: "/recomendacoes",
     icon: Sparkles,
     permissoes: ["GERENCIAR_EMPRESA", "GERENCIAR_MEMBROS"],
